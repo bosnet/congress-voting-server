@@ -1,0 +1,2 @@
+BOScoin membership server
+--------------

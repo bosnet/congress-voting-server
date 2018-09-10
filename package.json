@@ -1,0 +1,19 @@
+{
+  "name": "membership-server",
+  "version": "0.1.0",
+  "description": "BOScoin membership server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/owlchain/membership-server.git"
+  },
+  "author": "BlockchainOS",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/owlchain/membership-server/issues"
+  },
+  "homepage": "https://github.com/owlchain/membership-server#readme"
+}
