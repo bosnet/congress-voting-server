@@ -13,5 +13,41 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true,
   });
 
+  // class methods
+  Membership.Status = Status;
+
+  Membership.register = async function register(m) {
+    const d = await this.build(m).save();
+    return d;
+  };
+
+  Membership.findByAddress = async function findByAddress(address) {
+    const d = await this.findOne({
+      where: {
+        publicAddress: address,
+      },
+    });
+
+    return d;
+  };
+
+  // instance methods
+  Membership.prototype.activate = async function activate() {
+    const d = await this.update({ status: Status.active.name });
+    return d;
+  };
+
+  Membership.prototype.pend = async function pend() {
+    const d = await this.update({ status: Status.pending.name });
+    return d;
+  };
+
+  Membership.prototype.deactivate = async function deactivate() {
+    // TODO: prevent public address unique violation
+    await this.update({ status: Status.deleted.name });
+    const d = await this.destroy();
+    return d;
+  };
+
   return Membership;
 };
