@@ -38,5 +38,22 @@ router.delete('/memberships/:address', async (req, res, next) => {
   return res.json(underscored(m.toJSON()));
 });
 
+// activate an existing membership
+router.post('/memberships/:address/activate', async (req, res, next) => {
+  if (!req.body.is_agree_delegation) {
+    return next(createError(400, 'is_agree_delegation is required.'));
+  }
+
+  const m = await Membership.findByAddress(req.params.address);
+  if (!m) { return next(createError(404, 'The address does not exist.')); }
+
+  if (m.status === Membership.Status.verified.name) {
+    await m.activate();
+  } else {
+    return next(createError(400, 'membership status is incorrect.'));
+  }
+
+  return res.json(underscored(m.toJSON()));
+});
 
 module.exports = router;

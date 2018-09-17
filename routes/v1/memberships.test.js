@@ -3,6 +3,7 @@ const cryptoRandomString = require('crypto-random-string');
 const { expect } = require('chai');
 
 const app = require('../../app');
+const { Membership } = require('../../models/index');
 
 const urlPrefix = '/api/v1';
 
@@ -84,5 +85,50 @@ describe('Membership /v1 API', () => {
       .delete(`${urlPrefix}/memberships/wrong-address`)
       .expect('Content-Type', /json/)
       .expect(404));
+  });
+
+  describe('POST /memberships/:address/activate', () => {
+    it('should activate an existing membership', async () => {
+      const m = await Membership.register({
+        publicAddress: cryptoRandomString(56),
+        applicantId: cryptoRandomString(24),
+        status: Membership.Status.verified.name,
+      });
+
+      await request(app)
+        .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
+        .send({ is_agree_delegation: true })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then((res) => {
+          expect(res.body).to.have.property('public_address').to.equal(m.publicAddress);
+          expect(res.body).to.have.property('status').to.equal('active');
+        });
+    });
+
+    it('should return 400 without is_agree_delegation', async () => {
+      const m = await Membership.register({
+        publicAddress: cryptoRandomString(56),
+        applicantId: cryptoRandomString(24),
+        status: Membership.Status.verified.name,
+      });
+
+      await request(app)
+        .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('should return 400 if the membership status is not verified', async () => {
+      const m = await Membership.register({
+        publicAddress: cryptoRandomString(56),
+        applicantId: cryptoRandomString(24),
+      });
+
+      await request(app)
+        .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
   });
 });
