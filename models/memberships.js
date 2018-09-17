@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     publicAddress: { type: DataTypes.STRING(60), allowNull: false, unique: true },
     applicantId: { type: DataTypes.STRING(40), allowNull: false, unique: true },
     status: { type: DataTypes.ENUM, values: ['active', 'pending', 'verified', 'deleted'], defaultValue: Status.pending.name },
+    isAgreeDelegation: { type: DataTypes.BOOLEAN, defaultValue: false },
   }, {
     tableName: 'memberships',
     paranoid: true,
