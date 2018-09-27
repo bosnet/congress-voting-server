@@ -1,13 +1,17 @@
 const { Enum } = require('enumify');
 
 class Status extends Enum {}
-Status.initEnum(['active', 'pending', 'verified', 'deleted']);
+Status.initEnum(['pending', 'verified', 'rejected', 'active', 'deleted']);
 
 module.exports = (sequelize, DataTypes) => {
   const Membership = sequelize.define('Membership', {
     publicAddress: { type: DataTypes.STRING(60), allowNull: false, unique: true },
     applicantId: { type: DataTypes.STRING(40), allowNull: false, unique: true },
-    status: { type: DataTypes.ENUM, values: ['active', 'pending', 'verified', 'deleted'], defaultValue: Status.pending.name },
+    status: {
+      type: DataTypes.ENUM,
+      values: Status.enumValues.map(s => s.name),
+      defaultValue: Status.pending.name,
+    },
     isAgreeDelegation: { type: DataTypes.BOOLEAN, defaultValue: false },
   }, {
     tableName: 'memberships',
@@ -33,21 +37,34 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // instance methods
-  Membership.prototype.activate = async function activate() {
-    const d = await this.update({ status: Status.active.name });
-    return d;
+  Membership.prototype.pend = async function pend() {
+    if (this.status === Status.verified.name || this.status === Status.rejected.name) {
+      await this.update({ status: Status.pending.name });
+    }
   };
 
-  Membership.prototype.pend = async function pend() {
-    const d = await this.update({ status: Status.pending.name });
-    return d;
+  Membership.prototype.verify = async function verify() {
+    if (this.status === Status.pending.name || this.status === Status.rejected.name) {
+      await this.update({ status: Status.verified.name });
+    }
+  };
+
+  Membership.prototype.reject = async function reject() {
+    if (this.status === Status.pending.name || this.status === Status.verified.name) {
+      await this.update({ status: Status.rejected.name });
+    }
+  };
+
+  Membership.prototype.activate = async function activate() {
+    if (this.status === Status.verified.name) {
+      await this.update({ status: Status.active.name });
+    }
   };
 
   Membership.prototype.deactivate = async function deactivate() {
     // TODO: prevent public address unique violation
     await this.update({ status: Status.deleted.name });
-    const d = await this.destroy();
-    return d;
+    await this.destroy();
   };
 
   return Membership;

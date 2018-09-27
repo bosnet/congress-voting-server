@@ -16,7 +16,7 @@ module.exports = {
     },
     status: {
       type: Sequelize.ENUM,
-      values: ['active', 'pending', 'verified', 'deleted'],
+      values: ['pending', 'verified', 'rejected', 'active', 'deleted'],
     },
     isAgreeDelegation: {
       type: Sequelize.BOOLEAN,

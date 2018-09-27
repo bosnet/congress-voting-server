@@ -27,19 +27,83 @@ describe('Membership Model', () => {
     expect(result.id).to.equal(m.id);
   });
 
-  it('should activate a existing membership', async () => {
-    await m.activate();
+  it('should verify a existing membership', async () => {
+    await m.verify();
 
-    await m.reload();
-    expect(m.status).to.equal(Membership.Status.active.name);
+    expect(m.status).to.equal(Membership.Status.verified.name);
   });
 
-  it('should pend a existing membership', async () => {
+  it('should verify a existing membership only pending or rejected', async () => {
+    const u = await Membership.register({
+      publicAddress: cryptoRandomString(56),
+      applicantId: cryptoRandomString(24),
+      status: Membership.Status.active.name,
+    });
+
+    await u.verify();
+
+    expect(u.status).to.equal(Membership.Status.active.name);
+  });
+
+  it('should reject a existing membership', async () => {
+    await m.reject();
+
+    expect(m.status).to.equal(Membership.Status.rejected.name);
+  });
+
+  it('should reject a existing membership only pending or verified', async () => {
+    const u = await Membership.register({
+      publicAddress: cryptoRandomString(56),
+      applicantId: cryptoRandomString(24),
+      status: Membership.Status.active.name,
+    });
+
+    await u.reject();
+
+    expect(u.status).to.equal(Membership.Status.active.name);
+  });
+
+  it('should activate a existing membership', async () => {
+    const u = await Membership.register({
+      publicAddress: cryptoRandomString(56),
+      applicantId: cryptoRandomString(24),
+      status: Membership.Status.verified.name,
+    });
+
+    await u.activate();
+
+    expect(u.status).to.equal(Membership.Status.active.name);
+  });
+
+  it('should activate a existing membership only verified', async () => {
     await m.activate();
-    await m.pend();
 
     await m.reload();
     expect(m.status).to.equal(Membership.Status.pending.name);
+  });
+
+  it('should pend a existing membership', async () => {
+    const u = await Membership.register({
+      publicAddress: cryptoRandomString(56),
+      applicantId: cryptoRandomString(24),
+      status: Membership.Status.rejected.name,
+    });
+
+    await u.pend();
+
+    expect(u.status).to.equal(Membership.Status.pending.name);
+  });
+
+  it('should pend a existing membership only verified or rejected', async () => {
+    const u = await Membership.register({
+      publicAddress: cryptoRandomString(56),
+      applicantId: cryptoRandomString(24),
+      status: Membership.Status.active.name,
+    });
+
+    await u.pend();
+
+    expect(u.status).to.equal(Membership.Status.active.name);
   });
 
   it('should deactivate a existing membership', async () => {
