@@ -23,9 +23,30 @@ router.post('/memberships', async (req, res, next) => {
   return res.json(underscored(m.toJSON()));
 });
 
+// callback to get verification result from Sub&Substance
+router.post('/memberships/sumsub/callback', async (req, res) => {
+  if (req.body.type === 'INSPECTION_REVIEW_COMPLETED') {
+    // externalUserId is public address
+    const m = await Membership.findByAddress(req.body.externalUserId);
+    if (!m) { return res.status(404).json({}); }
+
+    if (req.body.review && req.body.review.reviewAnswer === 'GREEN') {
+      // verification passed
+      await m.verify();
+    } else if (req.body.review && req.body.review.reviewAnswer === 'RED') {
+      // verification failed
+      await m.reject();
+    }
+  }
+
+  return res.json({});
+});
+
 // find an existing membership
-router.get('/memberships/:address', async (req, res) => {
+router.get('/memberships/:address', async (req, res, next) => {
   const m = await Membership.findByAddress(req.params.address);
+  if (!m) { return next(createError(404, 'The address does not exist.')); }
+
   return res.json(underscored(m.toJSON()));
 });
 
