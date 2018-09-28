@@ -3,11 +3,13 @@ const createError = require('http-errors');
 
 const { Membership } = require('../../models/index');
 const { underscored } = require('../utils');
+const { getApplicantStatus } = require('./sumsub');
 
 const router = express.Router();
 
 // create new membership
 router.post('/memberships', async (req, res, next) => {
+  // TODO: auth check
   if (!req.body.public_address) {
     return next(createError(400, 'public_address is required.'));
   }
@@ -47,11 +49,18 @@ router.get('/memberships/:address', async (req, res, next) => {
   const m = await Membership.findByAddress(req.params.address);
   if (!m) { return next(createError(404, 'The address does not exist.')); }
 
+  if (req.query.renew) {
+    const result = await getApplicantStatus(m.applicantId);
+    if (result === 'verified') { await m.verify(); }
+    if (result === 'rejected') { await m.reject(); }
+  }
+
   return res.json(underscored(m.toJSON()));
 });
 
 // delete an existing membership
 router.delete('/memberships/:address', async (req, res, next) => {
+  // TODO: auth check
   const m = await Membership.findByAddress(req.params.address);
   if (!m) { return next(createError(404, 'The address does not exist.')); }
 
@@ -61,6 +70,7 @@ router.delete('/memberships/:address', async (req, res, next) => {
 
 // activate an existing membership
 router.post('/memberships/:address/activate', async (req, res, next) => {
+  // TODO: auth check
   if (!req.body.is_agree_delegation) {
     return next(createError(400, 'is_agree_delegation is required.'));
   }
@@ -68,9 +78,9 @@ router.post('/memberships/:address/activate', async (req, res, next) => {
   const m = await Membership.findByAddress(req.params.address);
   if (!m) { return next(createError(404, 'The address does not exist.')); }
 
-  if (m.status === Membership.Status.verified.name) {
-    await m.activate();
-  } else {
+  await m.activate();
+
+  if (m.status !== Status.active.name) {
     return next(createError(400, 'membership status is incorrect.'));
   }
 

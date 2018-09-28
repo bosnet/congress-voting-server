@@ -1,6 +1,7 @@
 const request = require('supertest');
 const cryptoRandomString = require('crypto-random-string');
 const { expect } = require('chai');
+const nock = require('nock');
 
 const app = require('../../app');
 const { Membership } = require('../../models/index');
@@ -106,6 +107,7 @@ describe('Membership /v1 API', () => {
 
   describe('GET /memberships/:address', () => {
     const address = cryptoRandomString(56);
+
     before(async () => request(app)
       .post(`${urlPrefix}/memberships`)
       .send({
@@ -123,6 +125,24 @@ describe('Membership /v1 API', () => {
       .then((res) => {
         expect(res.body).to.have.property('public_address').to.equal(address);
       }));
+
+    it('should renew verification result from sum&sub when renew parameter provided', (done) => {
+      nock('https://test-api.sumsub.com:443')
+        .filteringPath(/resources\/applicants.*/g, 'mocked')
+        .get('/mocked')
+        .reply(200, () => {
+          nock.cleanAll();
+          done();
+        });
+
+      request(app)
+        .get(`${urlPrefix}/memberships/${address}?renew=1`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then((res) => {
+          expect(res.body).to.have.property('public_address').to.equal(address);
+        });
+    });
   });
 
   describe('DELETE /memberships/:address', () => {

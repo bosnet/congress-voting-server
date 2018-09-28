@@ -26,6 +26,7 @@
     "decamelize": "^2.0.0",
     "enumify": "^1.0.4",
     "express": "~4.16.0",
+    "got": "^9.2.2",
     "http-errors": "~1.6.2",
     "morgan": "~1.9.0",
     "pg": "^7.4.3",
@@ -40,6 +41,7 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-mocha": "^5.2.0",
     "mocha": "^5.2.0",
+    "nock": "^10.0.0",
     "nodemon": "^1.18.4",
     "sequelize-cli": "^4.1.1",
     "supertest": "^3.3.0"
