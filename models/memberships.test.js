@@ -13,6 +13,10 @@ describe('Membership Model', () => {
     });
   });
 
+  after(async () => {
+    Membership.destroy({ where: {}, truncate: true });
+  });
+
   it('should register new membership', async () => {
     const result = await Membership.register({
       publicAddress: cryptoRandomString(56),

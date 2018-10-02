@@ -3,7 +3,7 @@ const createError = require('http-errors');
 
 const { Membership } = require('../../models/index');
 const { underscored } = require('../utils');
-const { getApplicantStatus } = require('./sumsub');
+const { getApplicantStatus } = require('../../lib/sumsub');
 
 const router = express.Router();
 
@@ -80,7 +80,7 @@ router.post('/memberships/:address/activate', async (req, res, next) => {
 
   await m.activate();
 
-  if (m.status !== Status.active.name) {
+  if (m.status !== Membership.Status.active.name) {
     return next(createError(400, 'membership status is incorrect.'));
   }
 
