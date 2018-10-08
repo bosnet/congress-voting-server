@@ -5,12 +5,12 @@ const { Vote } = require('./index');
 
 describe('Vote Model', () => {
   after(async () => {
-    Vote.destroy({ where: {}, truncate: true });
+    await Vote.destroy({ where: {}, truncate: true });
   });
 
   describe('register()', () => {
     after(async () => {
-      Vote.destroy({ where: {}, truncate: true });
+      await Vote.destroy({ where: {}, truncate: true });
     });
 
     it('should register new vote', async () => {

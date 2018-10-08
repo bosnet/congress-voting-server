@@ -5,12 +5,12 @@ const { Proposal } = require('./index');
 
 describe('Proposal Model', () => {
   after(async () => {
-    Proposal.destroy({ where: {}, truncate: true });
+    await Proposal.destroy({ where: {}, truncate: true });
   });
 
   describe('register()', () => {
     after(async () => {
-      Proposal.destroy({ where: {}, truncate: true });
+      await Proposal.destroy({ where: {}, truncate: true });
     });
 
     it('should register new proposal', async () => {

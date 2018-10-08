@@ -14,7 +14,7 @@ describe('Membership Model', () => {
   });
 
   after(async () => {
-    Membership.destroy({ where: {}, truncate: true });
+    await Membership.destroy({ where: {}, truncate: true });
   });
 
   it('should register new membership', async () => {
