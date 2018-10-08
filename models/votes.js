@@ -42,15 +42,15 @@ module.exports = (sequelize, DataTypes) => {
   Vote.register = async function register(m) {
     const exist = await this.findOne({
       where: {
-        proposalId: m.proposal_id,
-        publicAddress: m.public_address,
+        proposalId: m.proposalId,
+        publicAddress: m.publicAddress,
       },
     });
 
     if (!exist) {
       const d = await this.build({
-        proposalId: m.proposal_id,
-        publicAddress: m.public_address,
+        proposalId: m.proposalId,
+        publicAddress: m.publicAddress,
         ballot: uuidv4(),
         answer: Answer.enumValueOf(m.answer).name,
       }).save();

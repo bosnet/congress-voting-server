@@ -15,8 +15,8 @@ describe('Vote Model', () => {
 
     it('should register new vote', async () => {
       const result = await Vote.register({
-        proposal_id: 1,
-        public_address: cryptoRandomString(56),
+        proposalId: 1,
+        publicAddress: cryptoRandomString(56),
         answer: Vote.Answer.no.name,
       });
 
@@ -27,8 +27,8 @@ describe('Vote Model', () => {
       const proposalId = 2;
       const address = cryptoRandomString(56);
       const result = await Vote.register({
-        proposal_id: proposalId,
-        public_address: address,
+        proposalId,
+        publicAddress: address,
         answer: Vote.Answer.no.name,
       });
 
@@ -36,8 +36,8 @@ describe('Vote Model', () => {
       expect(result).to.have.property('answer').to.equal(Vote.Answer.no.name);
 
       const updated = await Vote.register({
-        proposal_id: proposalId,
-        public_address: address,
+        proposalId,
+        publicAddress: address,
         answer: Vote.Answer.yes.name,
       });
 

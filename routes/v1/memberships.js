@@ -7,7 +7,7 @@ const { getApplicantStatus } = require('../../lib/sumsub');
 
 const router = express.Router();
 
-// create new membership
+// create new membership (signature required)
 router.post('/memberships', async (req, res, next) => {
   // TODO: auth check
   if (!req.body.public_address) {
@@ -58,7 +58,7 @@ router.get('/memberships/:address', async (req, res, next) => {
   return res.json(underscored(m.toJSON()));
 });
 
-// delete an existing membership
+// delete an existing membership (signature required)
 router.delete('/memberships/:address', async (req, res, next) => {
   // TODO: auth check
   const m = await Membership.findByAddress(req.params.address);
@@ -68,9 +68,10 @@ router.delete('/memberships/:address', async (req, res, next) => {
   return res.json(underscored(m.toJSON()));
 });
 
-// activate an existing membership
+// activate an existing membership (signature required)
 router.post('/memberships/:address/activate', async (req, res, next) => {
   // TODO: auth check
+  // 투표가 있으면 탈퇴를 막아야 한다
   if (!req.body.is_agree_delegation) {
     return next(createError(400, 'is_agree_delegation is required.'));
   }
