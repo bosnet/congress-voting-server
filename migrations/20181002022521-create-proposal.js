@@ -12,6 +12,8 @@ module.exports = {
     start: { type: Sequelize.INTEGER },
     end: { type: Sequelize.INTEGER },
     hash: { type: Sequelize.STRING(100), allowNull: false, unique: true },
+    reported: { type: Sequelize.BOOLEAN, defaultValue: false },
+    reportConfirmed: { type: Sequelize.BOOLEAN, defaultValue: false },
     createdAt: { type: Sequelize.DATE, allowNull: false },
     updatedAt: { type: Sequelize.DATE, allowNull: false },
     deletedAt: { type: Sequelize.DATE },

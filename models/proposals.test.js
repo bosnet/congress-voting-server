@@ -54,6 +54,10 @@ describe('Proposal Model', () => {
       });
     });
 
+    after(async () => {
+      await Proposal.destroy({ where: {}, truncate: true });
+    });
+
     it('should return the proposal by hash', async () => {
       const result = await Proposal.findByHash(m.hash);
       expect(result.id).to.equal(m.id);
@@ -66,7 +70,70 @@ describe('Proposal Model', () => {
 
     it('should return proposals', async () => {
       const result = await Proposal.list();
-      expect(result).to.have.property('length').to.equal(1);
+      expect(result).to.have.lengthOf(1);
+    });
+  });
+
+  describe('report', () => {
+    let h1;
+    let h2;
+
+    beforeEach(async () => {
+      h1 = cryptoRandomString(30);
+      h2 = cryptoRandomString(30);
+
+      await Proposal.register({
+        title: 'example',
+        code: 'ex-00',
+        content: '# Example proposal',
+        start: 100,
+        end: 200,
+        hash: h1,
+        reported: false,
+        reportConfirmed: false,
+      });
+
+      await Proposal.register({
+        title: 'example',
+        code: 'ex-00',
+        content: '# Example proposal',
+        start: 100,
+        end: 150,
+        hash: h2,
+        reported: false,
+        reportConfirmed: false,
+      });
+    });
+
+    afterEach(async () => {
+      await Proposal.destroy({ where: {}, truncate: true });
+    });
+
+    it('should return proposal list to report voting result into sebak', async () => {
+      const result = await Proposal.listToReport(160);
+      expect(result).to.have.lengthOf(1);
+    });
+
+    it('should update an proposal as reported', async () => {
+      const p = await Proposal.findByHash(h2);
+      await p.report();
+      const result = await Proposal.listToReport(160);
+      expect(result).to.have.lengthOf(0);
+    });
+
+    it('should return proposal list to check if result is confirmed', async () => {
+      const p = await Proposal.findByHash(h2);
+      await p.report();
+      const result = await Proposal.listToConfirm(160);
+      expect(result).to.have.lengthOf(1);
+    });
+
+    it('should update an proposal as report confirmed', async () => {
+      const p = await Proposal.findByHash(h2);
+      await p.report();
+      await p.confirmReport();
+      const result = await Proposal.listToConfirm(160);
+      expect(result).to.have.lengthOf(0);
     });
   });
 });

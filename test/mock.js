@@ -46,6 +46,28 @@ const sebakGetProposals = () => {
   }
 };
 
+const sebakConfirmVotingResult = (hash) => {
+  if (useMock) {
+    nock(SEBAK_URL, { encodedQueryParams: true })
+      .get(`${SEBAK_PREFIX}/transactions/${hash}`)
+      .query({})
+      .reply(200, [{
+        T: 'transaction',
+        H: {
+          version: '',
+          created: '2018-01-01T00:00:00.000000000Z',
+          signature: '4C8MDRj8wvCF4ZE8b56pe5SthPwfCiFb3H9VTfXPFXh66d7kuyNBexAamsw888U8qbwt4JjmrL282vq5u2sAjQ1g',
+        },
+        B: {
+          source: 'GDIRF4UWPACXPPI4GW7CMTACTCNDIKJEHZK44RITZB4TD3YUM6CCVNGJ',
+          fee: '10000',
+          sequenceid: 0,
+          operations: [],
+        },
+      }]);
+  }
+};
+
 const sumsubApplicantStatus = (success, failed, pending) => {
   if (useMock) {
     nock('https://test-api.sumsub.com:443', { encodedQueryParams: true })
@@ -170,6 +192,7 @@ module.exports = {
   sebak: {
     currentHeight: sebakCurrentHeight,
     getProposals: sebakGetProposals,
+    confirmVotingResult: sebakConfirmVotingResult,
   },
   sumsub: {
     applicantStatus: sumsubApplicantStatus,
