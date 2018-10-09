@@ -106,17 +106,21 @@ describe('Membership /v1 API', () => {
 
 
   describe('GET /memberships/:address', () => {
+    let m;
     const address = cryptoRandomString(56);
 
-    before(async () => request(app)
-      .post(`${urlPrefix}/memberships`)
-      .send({
-        public_address: address,
-        applicant_id: cryptoRandomString(24),
-      })
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200));
+    before(async () => {
+      const res = await request(app)
+        .post(`${urlPrefix}/memberships`)
+        .send({
+          public_address: address,
+          applicant_id: cryptoRandomString(24),
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+      m = res.body;
+    });
 
     it('should return an existing membership', async () => request(app)
       .get(`${urlPrefix}/memberships/${address}`)
@@ -127,21 +131,31 @@ describe('Membership /v1 API', () => {
       }));
 
     it('should renew verification result from sum&sub when renew parameter provided', (done) => {
+      const interval = process.env.SUMSUB_RENEW_INTERVAL;
+      process.env.SUMSUB_RENEW_INTERVAL = 10;
+
       nock('https://test-api.sumsub.com:443')
         .filteringPath(/resources\/applicants.*/g, 'mocked')
         .get('/mocked')
-        .reply(200, () => {
-          nock.cleanAll();
-          done();
-        });
+        .reply(200, { status: { reviewStatus: 'pending' } });
 
-      request(app)
-        .get(`${urlPrefix}/memberships/${address}?renew=1`)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then((res) => {
-          expect(res.body).to.have.property('public_address').to.equal(address);
-        });
+      setTimeout(() => {
+        let err;
+        request(app)
+          .get(`${urlPrefix}/memberships/${address}`)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .then((res) => {
+            try {
+              expect(res.body).to.have.property('public_address').to.equal(address);
+              expect(res.body).to.have.property('updated_at').to.not.equal(m.updated_at);
+            } catch (e) { err = e; }
+
+            nock.cleanAll();
+            process.env.SUMSUB_RENEW_INTERVAL = interval;
+            done(err);
+          });
+      }, 100);
     });
   });
 

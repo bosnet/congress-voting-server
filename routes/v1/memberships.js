@@ -49,10 +49,16 @@ router.get('/memberships/:address', async (req, res, next) => {
   const m = await Membership.findByAddress(req.params.address);
   if (!m) { return next(createError(404, 'The address does not exist.')); }
 
-  if (req.query.renew) {
+  const now = new Date();
+  // SUMSUB_RENEW_INTERVAL is msec
+  now.setMilliseconds(now.getMilliseconds() + (process.env.SUMSUB_RENEW_INTERVAL || 1));
+
+  if (m.status === Membership.Status.pending.name && m.updatedAt < now) {
     const result = await getApplicantStatus(m.applicantId);
     if (result === 'verified') { await m.verify(); }
     if (result === 'rejected') { await m.reject(); }
+    if (result === 'pending') { await m.pend(); }
+    await m.reload();
   }
 
   return res.json(underscored(m.toJSON()));

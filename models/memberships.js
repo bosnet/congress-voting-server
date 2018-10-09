@@ -40,6 +40,8 @@ module.exports = (sequelize, DataTypes) => {
   Membership.prototype.pend = async function pend() {
     if (this.status === Status.verified.name || this.status === Status.rejected.name) {
       await this.update({ status: Status.pending.name });
+    } else if (this.status === Status.pending.name) { // to renew updatedAt
+      await Membership.update({ status: Status.pending.name }, { where: { id: this.id } });
     }
   };
 
