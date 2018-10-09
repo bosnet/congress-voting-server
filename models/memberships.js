@@ -13,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: Status.pending.name,
     },
     isAgreeDelegation: { type: DataTypes.BOOLEAN, defaultValue: false },
+    activatedAt: { type: DataTypes.INTEGER },
+    deactivatedAt: { type: DataTypes.INTEGER },
   }, {
     tableName: 'memberships',
     paranoid: true,
@@ -57,15 +59,15 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
 
-  Membership.prototype.activate = async function activate() {
+  Membership.prototype.activate = async function activate(height = 0) {
     if (this.status === Status.verified.name) {
-      await this.update({ status: Status.active.name });
+      await this.update({ status: Status.active.name, activatedAt: height });
     }
   };
 
-  Membership.prototype.deactivate = async function deactivate() {
+  Membership.prototype.deactivate = async function deactivate(height = 0) {
     // TODO: prevent public address unique violation
-    await this.update({ status: Status.deleted.name });
+    await this.update({ status: Status.deleted.name, deactivatedAt: height });
     await this.destroy();
   };
 

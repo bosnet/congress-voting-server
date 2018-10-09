@@ -1,25 +1,35 @@
 const express = require('express');
 const createError = require('http-errors');
+const { hash, verify } = require('sebakjs-util');
 
 const { Membership } = require('../../models/index');
 const { underscored } = require('../utils');
 const { getApplicantStatus } = require('../../lib/sumsub');
+const { currentHeight } = require('../../lib/sebak');
+
+const { SEBAK_NETWORKID = 'sebak-test-network' } = process.env;
 
 const router = express.Router();
 
 // create new membership (signature required)
 router.post('/memberships', async (req, res, next) => {
-  // TODO: auth check
-  if (!req.body.public_address) {
-    return next(createError(400, 'public_address is required.'));
+  const [publicAddress, applicantId] = req.body.data;
+  if (!publicAddress) {
+    return next(createError(400, 'public address is required.'));
   }
-  if (!req.body.applicant_id) {
-    return next(createError(400, 'applicant_id is required.'));
+  if (!applicantId) {
+    return next(createError(400, 'applicant id is required.'));
+  }
+
+  // check signature
+  const verified = verify(hash(req.body.data), SEBAK_NETWORKID, req.body.signature, publicAddress);
+  if (!verified) {
+    return next(createError(400, 'The signature is invalid.'));
   }
 
   const m = await Membership.register({
-    publicAddress: req.body.public_address,
-    applicantId: req.body.applicant_id,
+    publicAddress,
+    applicantId,
     status: Membership.Status.pending.name,
   });
   return res.json(underscored(m.toJSON()));
@@ -51,7 +61,7 @@ router.get('/memberships/:address', async (req, res, next) => {
 
   const now = new Date();
   // SUMSUB_RENEW_INTERVAL is msec
-  now.setMilliseconds(now.getMilliseconds() + (process.env.SUMSUB_RENEW_INTERVAL || 1));
+  now.setMilliseconds(now.getMilliseconds() - (process.env.SUMSUB_RENEW_INTERVAL || 1));
 
   if (m.status === Membership.Status.pending.name && m.updatedAt < now) {
     const result = await getApplicantStatus(m.applicantId);
@@ -66,26 +76,44 @@ router.get('/memberships/:address', async (req, res, next) => {
 
 // delete an existing membership (signature required)
 router.delete('/memberships/:address', async (req, res, next) => {
-  // TODO: auth check
-  const m = await Membership.findByAddress(req.params.address);
+  const addr = req.params.address;
+  const { sig } = req.query;
+
+  const m = await Membership.findByAddress(addr);
   if (!m) { return next(createError(404, 'The address does not exist.')); }
 
-  await m.deactivate();
+  // check signature
+
+  const verified = verify(hash([addr]), SEBAK_NETWORKID, sig, addr);
+  if (!verified) {
+    return next(createError(400, 'The signature is invalid.'));
+  }
+
+  const height = await currentHeight();
+  await m.deactivate(height);
   return res.json(underscored(m.toJSON()));
 });
 
 // activate an existing membership (signature required)
 router.post('/memberships/:address/activate', async (req, res, next) => {
-  // TODO: auth check
   // 투표가 있으면 탈퇴를 막아야 한다
-  if (!req.body.is_agree_delegation) {
-    return next(createError(400, 'is_agree_delegation is required.'));
-  }
-
   const m = await Membership.findByAddress(req.params.address);
   if (!m) { return next(createError(404, 'The address does not exist.')); }
 
-  await m.activate();
+  const [publicAddress, freezingHash] = req.body.data;
+  if (publicAddress !== req.params.address) {
+    return next(createError(400, 'The address does not match.'));
+  }
+
+  // check signature
+  const verified = verify(hash(req.body.data), SEBAK_NETWORKID, req.body.signature, publicAddress);
+  if (!verified) {
+    return next(createError(400, 'The signature is invalid.'));
+  }
+
+  // TODO: should check 10,000 BOS frozen?
+  const height = await currentHeight();
+  await m.activate(height);
 
   if (m.status !== Membership.Status.active.name) {
     return next(createError(400, 'membership status is incorrect.'));

@@ -2,41 +2,66 @@ const request = require('supertest');
 const cryptoRandomString = require('crypto-random-string');
 const { expect } = require('chai');
 const nock = require('nock');
+const { generate, hash, sign } = require('sebakjs-util');
 
 const app = require('../../app');
 const { Membership } = require('../../models/index');
+const mock = require('../../test/mock');
 
 const urlPrefix = '/api/v1';
 
 describe('Membership /v1 API', () => {
   describe('POST /memberships', () => {
-    it('should register new membership', async () => request(app)
-      .post(`${urlPrefix}/memberships`)
-      .send({
-        public_address: cryptoRandomString(56),
-        applicant_id: cryptoRandomString(24),
-      })
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200));
+    let keypair;
 
-    it('should reject without public_address', async () => request(app)
-      .post(`${urlPrefix}/memberships`)
-      .send({
-        applicant_id: cryptoRandomString(24),
-      })
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(400));
+    beforeEach(() => {
+      keypair = generate();
+    });
 
-    it('should reject without public_address', async () => request(app)
-      .post(`${urlPrefix}/memberships`)
-      .send({
-        public_address: cryptoRandomString(56),
-      })
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(400));
+    it('should register new membership', async () => {
+      const rlp = [keypair.address, cryptoRandomString(30)];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
+      await request(app)
+        .post(`${urlPrefix}/memberships`)
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
+    it('should reject without public_address or applicant_id', async () => {
+      const rlp = [keypair.address];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
+      await request(app)
+        .post(`${urlPrefix}/memberships`)
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('should reject with wrong signature', async () => {
+      const rlp = [keypair.address, cryptoRandomString(30)];
+      const sig = sign(hash(rlp), 'wrong-netword-id', keypair.seed);
+
+      await request(app)
+        .post(`${urlPrefix}/memberships`)
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
   });
 
   describe('POST /memberships/sumsub/callback', () => {
@@ -107,27 +132,31 @@ describe('Membership /v1 API', () => {
 
   describe('GET /memberships/:address', () => {
     let m;
-    const address = cryptoRandomString(56);
+    const keypair = generate();
 
     before(async () => {
+      const rlp = [keypair.address, cryptoRandomString(24)];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
       const res = await request(app)
         .post(`${urlPrefix}/memberships`)
         .send({
-          public_address: address,
-          applicant_id: cryptoRandomString(24),
+          data: rlp,
+          signature: sig,
         })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
+
       m = res.body;
     });
 
     it('should return an existing membership', async () => request(app)
-      .get(`${urlPrefix}/memberships/${address}`)
+      .get(`${urlPrefix}/memberships/${keypair.address}`)
       .expect('Content-Type', /json/)
       .expect(200)
       .then((res) => {
-        expect(res.body).to.have.property('public_address').to.equal(address);
+        expect(res.body).to.have.property('public_address').to.equal(keypair.address);
       }));
 
     it('should renew verification result from sum&sub when renew parameter provided', (done) => {
@@ -142,12 +171,12 @@ describe('Membership /v1 API', () => {
       setTimeout(() => {
         let err;
         request(app)
-          .get(`${urlPrefix}/memberships/${address}`)
+          .get(`${urlPrefix}/memberships/${keypair.address}`)
           .expect('Content-Type', /json/)
           .expect(200)
           .then((res) => {
             try {
-              expect(res.body).to.have.property('public_address').to.equal(address);
+              expect(res.body).to.have.property('public_address').to.equal(keypair.address);
               expect(res.body).to.have.property('updated_at').to.not.equal(m.updated_at);
             } catch (e) { err = e; }
 
@@ -160,73 +189,128 @@ describe('Membership /v1 API', () => {
   });
 
   describe('DELETE /memberships/:address', () => {
-    const address = cryptoRandomString(56);
-    before(async () => request(app)
-      .post(`${urlPrefix}/memberships`)
-      .send({
-        public_address: address,
-        applicant_id: cryptoRandomString(24),
-      })
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200));
+    let keypair;
+    const expectedHeight = 100;
 
-    it('should delete an existing membership', async () => request(app)
-      .delete(`${urlPrefix}/memberships/${address}`)
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .then((res) => {
-        expect(res.body).to.have.property('public_address').to.equal(address);
-        expect(res.body).to.have.property('status').to.equal('deleted');
-        expect(res.body).to.have.property('deleted_at').to.be.not.null;
-      }));
+    beforeEach(async () => {
+      keypair = generate();
+      mock.sebak.currentHeight(expectedHeight);
+      await Membership.register({
+        publicAddress: keypair.address,
+        applicantId: cryptoRandomString(24),
+        status: Membership.Status.active.name,
+      });
+    });
 
-    it('should return 404 if the address not exist', async () => request(app)
-      .delete(`${urlPrefix}/memberships/wrong-address`)
-      .expect('Content-Type', /json/)
-      .expect(404));
+    it('should delete an existing membership', async () => {
+      const rlp = [keypair.address];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
+      await request(app)
+        .delete(`${urlPrefix}/memberships/${keypair.address}?sig=${sig}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then((res) => {
+          expect(res.body).to.have.property('public_address').to.equal(keypair.address);
+          expect(res.body).to.have.property('status').to.equal('deleted');
+          expect(res.body).to.have.property('deleted_at').to.be.not.null;
+          expect(res.body).to.have.property('deactivated_at').to.equal(expectedHeight);
+        });
+    });
+
+    it('should return 404 if the address not exist', async () => {
+      const rlp = [keypair.address];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
+      await request(app)
+        .delete(`${urlPrefix}/memberships/wrong-address?sig=${sig}`)
+        .expect('Content-Type', /json/)
+        .expect(404);
+    });
+
+    it('should return 400 if signature is invalid', async () => {
+      const rlp = [keypair.address];
+      const sig = sign(hash(rlp), 'wrong-network-id', keypair.seed);
+
+      await request(app)
+        .delete(`${urlPrefix}/memberships/${keypair.address}?sig=${sig}`)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
   });
 
   describe('POST /memberships/:address/activate', () => {
+    let keypair;
+    const expectedHeight = 100;
+
+    beforeEach(() => {
+      keypair = generate();
+      mock.sebak.currentHeight(expectedHeight);
+    });
+
     it('should activate an existing membership', async () => {
       const m = await Membership.register({
-        publicAddress: cryptoRandomString(56),
+        publicAddress: keypair.address,
         applicantId: cryptoRandomString(24),
         status: Membership.Status.verified.name,
       });
 
+      const rlp = [keypair.address, cryptoRandomString(30)];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
       await request(app)
         .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
-        .send({ is_agree_delegation: true })
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
         .then((res) => {
           expect(res.body).to.have.property('public_address').to.equal(m.publicAddress);
           expect(res.body).to.have.property('status').to.equal('active');
+          expect(res.body).to.have.property('activated_at').to.equal(expectedHeight);
         });
-    });
-
-    it('should return 400 without is_agree_delegation', async () => {
-      const m = await Membership.register({
-        publicAddress: cryptoRandomString(56),
-        applicantId: cryptoRandomString(24),
-        status: Membership.Status.verified.name,
-      });
-
-      await request(app)
-        .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
-        .expect('Content-Type', /json/)
-        .expect(400);
     });
 
     it('should return 400 if the membership status is not verified', async () => {
       const m = await Membership.register({
-        publicAddress: cryptoRandomString(56),
+        publicAddress: keypair.address,
         applicantId: cryptoRandomString(24),
       });
 
+      const rlp = [keypair.address, cryptoRandomString(30)];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
       await request(app)
         .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('should return 400 if given signature is invalid', async () => {
+      const m = await Membership.register({
+        publicAddress: keypair.address,
+        applicantId: cryptoRandomString(24),
+        status: Membership.Status.verified.name,
+      });
+
+      const rlp = [keypair.address, cryptoRandomString(30)];
+      const sig = sign(hash(rlp), 'wrong-network-id', keypair.seed);
+
+      await request(app)
+        .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(400);
     });

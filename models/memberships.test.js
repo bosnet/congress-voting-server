@@ -74,13 +74,14 @@ describe('Membership Model', () => {
       status: Membership.Status.verified.name,
     });
 
-    await u.activate();
+    await u.activate(12);
 
     expect(u.status).to.equal(Membership.Status.active.name);
+    expect(u.activatedAt).to.equal(12);
   });
 
   it('should activate a existing membership only verified', async () => {
-    await m.activate();
+    await m.activate(10);
 
     await m.reload();
     expect(m.status).to.equal(Membership.Status.pending.name);
@@ -111,9 +112,10 @@ describe('Membership Model', () => {
   });
 
   it('should deactivate a existing membership', async () => {
-    await m.deactivate();
-    const [result] = await sequelize.query(`SELECT status, "deletedAt" from memberships WHERE id=${m.id}`);
+    await m.deactivate(13);
+    const [result] = await sequelize.query(`SELECT status, "deletedAt", "deactivatedAt" from memberships WHERE id=${m.id}`);
     expect(result[0].deletedAt).to.be.not.null;
     expect(result[0].status).to.equal(Membership.Status.deleted.name);
+    expect(result[0].deactivatedAt).to.equal(13);
   });
 });
