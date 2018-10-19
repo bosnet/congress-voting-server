@@ -22,6 +22,7 @@
   "homepage": "https://github.com/owlchain/membership-server#readme",
   "dependencies": {
     "cookie-parser": "~1.4.3",
+    "cors": "^2.8.4",
     "debug": "~2.6.9",
     "decamelize": "^2.0.0",
     "enumify": "^1.0.4",

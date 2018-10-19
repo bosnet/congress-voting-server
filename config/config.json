@@ -2,7 +2,7 @@
   "development": {
     "username": "postgres",
     "password": "postgres",
-    "database": "helios",
+    "database": "votingdev",
     "host": "127.0.0.1",
     "dialect": "postgres"
   },
