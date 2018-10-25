@@ -188,6 +188,21 @@ const sumsubApplicantStatus = (success, failed, pending) => {
   }
 };
 
+const sumsubAccessToken = (address) => {
+  if (useMock) {
+    nock('https://test-api.sumsub.com:443', { encodedQueryParams: true })
+      .post('/resources/accessTokens')
+      .query({
+        userId: address,
+        key: process.env.SUMSUB_APIKEY,
+      })
+      .reply(200, {
+        token: 'ddb9ac92-c522-40d0-993d-7e438c298329',
+        userId: address,
+      });
+  }
+};
+
 module.exports = {
   sebak: {
     currentHeight: sebakCurrentHeight,
@@ -196,6 +211,7 @@ module.exports = {
   },
   sumsub: {
     applicantStatus: sumsubApplicantStatus,
+    accessToken: sumsubAccessToken,
   },
   cleanAll: nock.cleanAll,
 };

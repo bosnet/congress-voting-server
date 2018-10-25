@@ -4,7 +4,7 @@ const { hash, verify } = require('sebakjs-util');
 
 const { Membership } = require('../../models/index');
 const { underscored } = require('../utils');
-const { getApplicantStatus } = require('../../lib/sumsub');
+const { getApplicantStatus, getAccessToken } = require('../../lib/sumsub');
 const { currentHeight } = require('../../lib/sebak');
 
 const { SEBAK_NETWORKID = 'sebak-test-network' } = process.env;
@@ -52,6 +52,13 @@ router.post('/memberships/sumsub/callback', async (req, res) => {
   }
 
   return res.json({});
+});
+
+// obtain access token from sum&sub
+router.get('/memberships/sumsub/access-token/:address', async (req, res) => {
+  const token = await getAccessToken(req.params.address);
+
+  return res.json({data: token});
 });
 
 // find an existing membership
