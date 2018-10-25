@@ -47,6 +47,11 @@ router.get('/proposals/:id', async (req, res, next) => {
 
 // vote to a proposal(with signature)
 router.post('/proposals/:id/vote', async (req, res, next) => {
+  const [publicAddress, proposalId, answer] = req.body.data;
+  if (req.params.id !== proposalId) {
+    return next(createError(400, 'The proposal id does not match.'));
+  }
+
   const pr = await Proposal.findById(req.params.id);
   if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
 
@@ -54,8 +59,6 @@ router.post('/proposals/:id/vote', async (req, res, next) => {
   if (height < pr.start || pr.end < height) {
     return next(createError(400, 'The proposal is not opened.'));
   }
-
-  const [publicAddress, answer] = req.body.data;
 
   // check signature
   const verified = verify(hash(req.body.data), SEBAK_NETWORKID, req.body.signature, publicAddress);
