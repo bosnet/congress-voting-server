@@ -20,11 +20,35 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true,
   });
 
+  const MembershipLog = sequelize.define('MembershipLog', {
+    publicAddress: { type: DataTypes.STRING(60), allowNull: false },
+    applicantId: { type: DataTypes.STRING(40) },
+    status: { type: DataTypes.STRING(10) },
+    isAgreeDelegation: { type: DataTypes.BOOLEAN },
+    activatedAt: { type: DataTypes.INTEGER },
+    deactivatedAt: { type: DataTypes.INTEGER },
+    signature: { type: DataTypes.STRING(100) },
+  }, { tableName: 'memberships_log' });
+
+  MembershipLog.register = async function register(m) {
+    const d = await this.build({
+      publicAddress: m.publicAddress,
+      applicantId: m.applicantId,
+      status: m.status,
+      isAgreeDelegation: m.isAgreeDelegation,
+      activatedAt: m.activatedAt,
+      deactivatedAt: m.deactivatedAt,
+      signature: m.signature,
+    }).save();
+    return d;
+  };
+
   // class methods
   Membership.Status = Status;
 
-  Membership.register = async function register(m) {
+  Membership.register = async function register(m, sig) {
     const d = await this.build(m).save();
+    await MembershipLog.register(Object.assign({ signature: sig }, d.toJSON()));
     return d;
   };
 
@@ -42,32 +66,38 @@ module.exports = (sequelize, DataTypes) => {
   Membership.prototype.pend = async function pend() {
     if (this.status === Status.verified.name || this.status === Status.rejected.name) {
       await this.update({ status: Status.pending.name });
+      await MembershipLog.register(this.toJSON());
     } else if (this.status === Status.pending.name) { // to renew updatedAt
       await Membership.update({ status: Status.pending.name }, { where: { id: this.id } });
+      await MembershipLog.register(this.toJSON());
     }
   };
 
   Membership.prototype.verify = async function verify() {
     if (this.status === Status.pending.name || this.status === Status.rejected.name) {
       await this.update({ status: Status.verified.name });
+      await MembershipLog.register(this.toJSON());
     }
   };
 
   Membership.prototype.reject = async function reject() {
     if (this.status === Status.pending.name || this.status === Status.verified.name) {
       await this.update({ status: Status.rejected.name });
+      await MembershipLog.register(this.toJSON());
     }
   };
 
-  Membership.prototype.activate = async function activate(height = 0) {
+  Membership.prototype.activate = async function activate(height = 0, sig) {
     if (this.status === Status.verified.name) {
       await this.update({ status: Status.active.name, activatedAt: height });
+      await MembershipLog.register(Object.assign({ signature: sig }, this.toJSON()));
     }
   };
 
-  Membership.prototype.deactivate = async function deactivate(height = 0) {
+  Membership.prototype.deactivate = async function deactivate(height = 0, sig) {
     // TODO: prevent public address unique violation
     await this.update({ status: Status.deleted.name, deactivatedAt: height });
+    await MembershipLog.register(Object.assign({ signature: sig }, this.toJSON()));
     await this.destroy();
   };
 

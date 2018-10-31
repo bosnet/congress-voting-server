@@ -41,7 +41,7 @@ router.post('/memberships', async (req, res, next) => {
       publicAddress,
       applicantId,
       status: Membership.Status.pending.name,
-    });
+    }, req.body.signature);
     return res.json(underscored(m.toJSON()));
   } catch (err) {
     return next(err);
@@ -123,7 +123,7 @@ router.delete('/memberships/:address', async (req, res, next) => {
     }
 
     const height = await currentHeight();
-    await m.deactivate(height);
+    await m.deactivate(height, sig);
     return res.json(underscored(m.toJSON()));
   } catch (err) {
     return next(err);
@@ -154,7 +154,7 @@ router.post('/memberships/:address/activate', async (req, res, next) => {
 
     // TODO: should check 10,000 BOS frozen?
     const height = await currentHeight();
-    await m.activate(height);
+    await m.activate(height, req.body.signature);
 
     if (m.status !== Membership.Status.active.name) {
       return next(createError(400, 'membership status is incorrect.'));
