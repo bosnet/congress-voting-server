@@ -112,6 +112,10 @@ router.delete('/memberships/:address', async (req, res, next) => {
     const addr = req.params.address;
     const { sig } = req.query;
 
+    if (!sig) {
+      return next(createError(400, 'The signature is required.'));
+    }
+
     const m = await Membership.findByAddress(addr);
     if (!m) { return next(createError(404, 'The address does not exist.')); }
 

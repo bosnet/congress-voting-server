@@ -3,11 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const morgan = require('morgan');
+
+const logger = require('./lib/logger');
 
 const app = express();
 
-app.use(logger('dev'));
+app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -27,6 +29,9 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   const status = err.status || 500;
   // TODO: error logging(sentry?)
+  if (status >= 500) {
+    logger.error(err);
+  }
   res.status(status).json({
     error: err.message,
   });
