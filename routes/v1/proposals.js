@@ -19,6 +19,7 @@ const router = express.Router();
 setTimeout(() => {
   setInterval(async () => {
     // FIXME: fix handle errors
+    // TODO: integrate with sebak
     await saveProposals();
     await reportVotingResult();
     await confirmVotingResult();
@@ -26,55 +27,72 @@ setTimeout(() => {
 }, parseInt(process.env.FETCH_INTERVAL, 10) * Math.random());
 
 // proposal list
-router.get('/proposals', async (req, res) => {
-  const prs = await Proposal.list();
-  const result = prs.map(p => underscored(p.toJSON()));
+router.get('/proposals', async (req, res, next) => {
+  try {
+    const prs = await Proposal.list();
+    const result = prs.map(p => underscored(p.toJSON()));
 
-  return res.json({
-    data: result,
-  });
+    return res.json({
+      data: result,
+    });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // proposal detail
 router.get('/proposals/:id', async (req, res, next) => {
-  const pr = await Proposal.findById(req.params.id);
-  if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
+  try {
+    const pr = await Proposal.findById(req.params.id);
+    if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
 
-  return res.json({
-    data: underscored(pr.toJSON()),
-  });
+    return res.json({
+      data: underscored(pr.toJSON()),
+    });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // vote to a proposal(with signature)
 router.post('/proposals/:id/vote', async (req, res, next) => {
-  const [publicAddress, proposalId, answer] = req.body.data;
-  if (req.params.id !== proposalId) {
-    return next(createError(400, 'The proposal id does not match.'));
+  try {
+    const [publicAddress, proposalId, answer] = req.body.data;
+    if (parseInt(req.params.id, 10) !== proposalId) {
+      return next(createError(400, 'The proposal id does not match.'));
+    }
+
+    const pr = await Proposal.findById(req.params.id);
+    if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
+
+    const height = await currentHeight();
+    if (height < pr.start || pr.end < height) {
+      return next(createError(400, 'The proposal is not opened.'));
+    }
+
+    // check signature
+    const verified = verify(
+      hash(req.body.data),
+      SEBAK_NETWORKID,
+      req.body.signature,
+      publicAddress,
+    );
+    if (!verified) {
+      return next(createError(400, 'The signature is invalid.'));
+    }
+
+    const v = await Vote.register({
+      proposalId: pr.id,
+      publicAddress,
+      answer,
+    });
+
+    return res.json({
+      data: underscored(v.toJSON()),
+    });
+  } catch (err) {
+    return next(err);
   }
-
-  const pr = await Proposal.findById(req.params.id);
-  if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
-
-  const height = await currentHeight();
-  if (height < pr.start || pr.end < height) {
-    return next(createError(400, 'The proposal is not opened.'));
-  }
-
-  // check signature
-  const verified = verify(hash(req.body.data), SEBAK_NETWORKID, req.body.signature, publicAddress);
-  if (!verified) {
-    return next(createError(400, 'The signature is invalid.'));
-  }
-
-  const v = await Vote.register({
-    proposalId: pr.id,
-    publicAddress,
-    answer,
-  });
-
-  return res.json({
-    data: underscored(v.toJSON()),
-  });
 });
 
 module.exports = router;

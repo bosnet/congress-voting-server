@@ -89,7 +89,7 @@ describe('Proposals /v1 API', () => {
     it('should vote to given proposal', async () => {
       mock.sebak.currentHeight(120);
 
-      const rlp = [keypair.address, Vote.Answer.yes.name];
+      const rlp = [keypair.address, proposalId, Vote.Answer.yes.name];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
 
       await request(app)
