@@ -60,6 +60,16 @@ module.exports = (sequelize, DataTypes) => {
     return prs;
   };
 
+  Proposal.listOpened = async function listOpened(currentBlock = 0) {
+    const prs = await this.findAll({
+      where: {
+        start: { [sequelize.Op.lte]: currentBlock },
+        end: { [sequelize.Op.gte]: currentBlock },
+      },
+    });
+    return prs;
+  };
+
   // instance methods
   Proposal.prototype.report = async function report() {
     await this.update({ reported: true });

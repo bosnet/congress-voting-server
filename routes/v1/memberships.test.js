@@ -5,7 +5,7 @@ const nock = require('nock');
 const { generate, hash, sign } = require('sebakjs-util');
 
 const app = require('../../app');
-const { Membership } = require('../../models/index');
+const { Membership, Proposal } = require('../../models/index');
 const mock = require('../../test/mock');
 
 const urlPrefix = '/api/v1';
@@ -202,6 +202,10 @@ describe('Membership /v1 API', () => {
       });
     });
 
+    after(async () => {
+      await Proposal.destroy({ where: {}, truncate: true });
+    });
+
     it('should delete an existing membership', async () => {
       const rlp = [keypair.address];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
@@ -216,6 +220,24 @@ describe('Membership /v1 API', () => {
           expect(res.body).to.have.property('deleted_at').to.be.not.null;
           expect(res.body).to.have.property('deactivated_at').to.equal(expectedHeight);
         });
+    });
+
+    it('should not delete an existing membership if there is a opened proposal at least', async () => {
+      await Proposal.register({
+        title: 'PF',
+        code: 'pf-00',
+        content: '# PF00',
+        start: 50,
+        end: 150,
+        hash: cryptoRandomString(30),
+      });
+      const rlp = [keypair.address];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
+      await request(app)
+        .delete(`${urlPrefix}/memberships/${keypair.address}?sig=${sig}`)
+        .expect('Content-Type', /json/)
+        .expect(400);
     });
 
     it('should return 404 if the address not exist', async () => {

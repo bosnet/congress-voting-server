@@ -2,7 +2,7 @@ const express = require('express');
 const createError = require('http-errors');
 const { hash, verify } = require('sebakjs-util');
 
-const { Membership } = require('../../models/index');
+const { Membership, Proposal } = require('../../models/index');
 const { underscored } = require('../utils');
 const { getApplicantStatus, getAccessToken } = require('../../lib/sumsub');
 const { currentHeight } = require('../../lib/sebak');
@@ -116,14 +116,18 @@ router.delete('/memberships/:address', async (req, res, next) => {
     if (!m) { return next(createError(404, 'The address does not exist.')); }
 
     // check signature
-
     const verified = verify(hash([addr]), SEBAK_NETWORKID, sig, addr);
     if (!verified) {
       return next(createError(400, 'The signature is invalid.'));
     }
 
     const height = await currentHeight();
+    const prs = await Proposal.listOpened(height);
+    if (prs.length > 0) {
+      return next(createError(400, 'Deregistering mebership is impossible if there are opened votes.'));
+    }
     await m.deactivate(height, sig);
+
     return res.json(underscored(m.toJSON()));
   } catch (err) {
     return next(err);
