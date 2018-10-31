@@ -8,8 +8,17 @@ const useMock = !process.env.DONT_USE_MOCK;
 const sebakCurrentHeight = (expectedHeight) => {
   if (useMock) {
     nock(SEBAK_URL, { encodedQueryParams: true })
-      .get(`${SEBAK_PREFIX}/`)
-      .reply(200, { height: expectedHeight });
+      .get('/')
+      .reply(200, {
+        node: {},
+        policy: {},
+        block: {
+          height: expectedHeight,
+          hash: '5nSRHXYsCYp3oqPRB9HeXEHKk9BL5pY5sjYmwbfDWTgR',
+          'total-txs': 1000,
+          'total-ops': 1000,
+        },
+      });
   }
 };
 
