@@ -77,6 +77,33 @@ const sebakConfirmVotingResult = (hash) => {
   }
 };
 
+const sebakGetFrozenAccount = (expectedAddress, expectedLinkedAddress) => {
+  if (useMock) {
+    nock(SEBAK_URL, { encodedQueryParams: true })
+      .get(`${SEBAK_PREFIX}/accounts/${expectedAddress}`)
+      .reply(200, {
+        _links:
+          {
+            operations: {
+              href: `/api/v1/accounts/${expectedAddress}/operations{?cursor,limit,order}`,
+              templated: true,
+            },
+            self: {
+              href: `/api/v1/accounts/${expectedAddress}`,
+            },
+            transactions: {
+              href: `/api/v1/accounts/${expectedAddress}/transactions{?cursor,limit,order}`,
+              templated: true,
+            },
+          },
+        address: expectedAddress,
+        balance: '100000000000',
+        linked: expectedLinkedAddress,
+        sequence_id: 0,
+      });
+  }
+};
+
 const sumsubApplicantStatus = (success, failed, pending) => {
   if (useMock) {
     nock('https://test-api.sumsub.com:443', { encodedQueryParams: true })
@@ -217,6 +244,7 @@ module.exports = {
     currentHeight: sebakCurrentHeight,
     getProposals: sebakGetProposals,
     confirmVotingResult: sebakConfirmVotingResult,
+    getFrozenAccount: sebakGetFrozenAccount,
   },
   sumsub: {
     applicantStatus: sumsubApplicantStatus,

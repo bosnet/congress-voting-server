@@ -263,11 +263,14 @@ describe('Membership /v1 API', () => {
 
   describe('POST /memberships/:address/activate', () => {
     let keypair;
+    let frozenAddress;
     const expectedHeight = 100;
 
     beforeEach(() => {
       keypair = generate();
+      frozenAddress = cryptoRandomString(40);
       mock.sebak.currentHeight(expectedHeight);
+      mock.sebak.getFrozenAccount(frozenAddress, keypair.address);
     });
 
     it('should activate an existing membership', async () => {
@@ -277,7 +280,7 @@ describe('Membership /v1 API', () => {
         status: Membership.Status.verified.name,
       });
 
-      const rlp = [keypair.address, cryptoRandomString(30)];
+      const rlp = [keypair.address, frozenAddress];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
 
       await request(app)
@@ -302,7 +305,7 @@ describe('Membership /v1 API', () => {
         applicantId: cryptoRandomString(24),
       });
 
-      const rlp = [keypair.address, cryptoRandomString(30)];
+      const rlp = [keypair.address, frozenAddress];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
 
       await request(app)
@@ -323,8 +326,30 @@ describe('Membership /v1 API', () => {
         status: Membership.Status.verified.name,
       });
 
-      const rlp = [keypair.address, cryptoRandomString(30)];
+      const rlp = [keypair.address, frozenAddress];
       const sig = sign(hash(rlp), 'wrong-network-id', keypair.seed);
+
+      await request(app)
+        .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('should return 400 if given frozen address is invalid', async () => {
+      const key = generate();
+      const m = await Membership.register({
+        publicAddress: key.address,
+        applicantId: cryptoRandomString(24),
+        status: Membership.Status.verified.name,
+      });
+
+      const rlp = [key.address, frozenAddress];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, key.seed);
 
       await request(app)
         .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
