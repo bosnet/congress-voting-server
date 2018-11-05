@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "batch": "node ./bin/batch",
     "test": "mocha --exit --recursive -t 20000 $(find . -name '*.test.js' -not -path './node_modules/*')",
     "lint": "eslint .",
     "dev": "nodemon npm start | pino-pretty",

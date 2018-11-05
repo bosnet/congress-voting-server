@@ -4,27 +4,11 @@ const { hash, verify } = require('sebakjs-util');
 
 const { Proposal, Vote } = require('../../models/index');
 const { underscored } = require('../utils');
-const {
-  saveProposals,
-  currentHeight,
-  reportVotingResult,
-  confirmVotingResult,
-} = require('../../lib/sebak');
+const { currentHeight } = require('../../lib/sebak');
 
 const { SEBAK_NETWORKID = 'sebak-test-network' } = process.env;
 
 const router = express.Router();
-
-// fetch proposals and save them
-setTimeout(() => {
-  setInterval(async () => {
-    // FIXME: fix handle errors
-    // TODO: integrate with sebak
-    await saveProposals();
-    await reportVotingResult();
-    await confirmVotingResult();
-  }, parseInt(process.env.FETCH_INTERVAL, 10));
-}, parseInt(process.env.FETCH_INTERVAL, 10) * Math.random());
 
 // proposal list
 router.get('/proposals', async (req, res, next) => {
