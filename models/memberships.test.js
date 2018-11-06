@@ -118,4 +118,16 @@ describe('Membership Model', () => {
     expect(result[0].status).to.equal(Membership.Status.deleted.name);
     expect(result[0].deactivatedAt).to.equal(13);
   });
+
+  it('should register membership with deleted address', async () => {
+    const newUser = {
+      publicAddress: m.publicAddress,
+      applicantId: m.applicantId,
+      status: Membership.Status.pending.name,
+    };
+    await m.deactivate(13);
+
+    const result = await Membership.register(newUser);
+    expect(result).to.have.property('id').to.not.equal(m.id);
+  });
 });

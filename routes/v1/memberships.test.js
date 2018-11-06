@@ -215,7 +215,6 @@ describe('Membership /v1 API', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .then((res) => {
-          expect(res.body).to.have.property('public_address').to.equal(keypair.address);
           expect(res.body).to.have.property('status').to.equal('deleted');
           expect(res.body).to.have.property('deleted_at').to.be.not.null;
           expect(res.body).to.have.property('deactivated_at').to.equal(expectedHeight);
