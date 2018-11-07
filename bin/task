@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+
+const camelcase = require('camelcase');
+const taskFns = require('../lib/tasks');
+const { currentHeight } = require('../lib/sebak');
+
+const tasks = {};
+const extra = {};
+const argv = process.argv.slice(2);
+
+Object.keys(process.env).filter(k => k.startsWith('SEBAK_')).forEach((k) => {
+  extra[camelcase(k.substring(6))] = process.env[k];
+});
+
+Object.values(taskFns).forEach((f) => {
+  if (f && f instanceof Function) {
+    const name = f.$name || f.name;
+    if (!tasks[name]) {
+      tasks[f.$name || f.name] = f;
+    }
+  }
+});
+
+/**
+ * SEBAK_PROPOSER_ADDRESS=1 ./bin/task save-proposals [other-task-name]
+ *
+ * @param options
+ * @returns {Promise<Array>}
+ */
+async function taskMain(options) {
+  console.log(options);
+
+  const results = [];
+  for (let i = 0; i < argv.length; i += 1) {
+    const name = argv[i];
+    if (!tasks[name]) {
+      throw new Error(`no task found : ${name}`);
+    } else {
+      const res = await tasks[name](options); // eslint-disable-line no-await-in-loop
+      results.push(res);
+    }
+  }
+
+  return results;
+}
+
+currentHeight()
+  .then(height => taskMain(Object.assign({ height }, extra)))
+  .catch((e) => {
+    console.log(e);
+    process.exit(1);
+  });
