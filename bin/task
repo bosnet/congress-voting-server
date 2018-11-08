@@ -48,7 +48,10 @@ async function taskMain(options) {
 
 currentHeight()
   .then(height => taskMain(Object.assign({ height }, extra)))
-  .catch((e) => {
+  .then(() => {
+    console.log('completed');
+    process.exit(0);
+  }, (e) => {
     console.log(e);
     process.exit(1);
   });
