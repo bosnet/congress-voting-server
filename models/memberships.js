@@ -98,7 +98,12 @@ module.exports = (sequelize, DataTypes) => {
   Membership.prototype.activate = async function activate(height = 0, sig) {
     if (this.status === Status.verified.name) {
       await this.update({ status: Status.active.name, activatedAt: height });
-      await MembershipLog.register(Object.assign({ signature: sig, membershipId: this.id }, this.toJSON()));
+      await MembershipLog.register(
+        Object.assign(
+          { signature: sig, membershipId: this.id },
+          this.toJSON(),
+        ),
+      );
     }
   };
 
@@ -107,9 +112,14 @@ module.exports = (sequelize, DataTypes) => {
     await this.update({
       publicAddress: hash([this.publicAddress, height]),
       status: Status.deleted.name,
-      deactivatedAt: height
+      deactivatedAt: height,
     });
-    await MembershipLog.register(Object.assign({ signature: sig, membershipId: this.id }, this.toJSON()));
+    await MembershipLog.register(
+      Object.assign(
+        { signature: sig, membershipId: this.id },
+        this.toJSON(),
+      ),
+    );
     await this.destroy();
   };
 

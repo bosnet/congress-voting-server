@@ -46,9 +46,9 @@ router.post('/memberships', async (req, res, next) => {
     return res.json(underscored(m.toJSON()));
   } catch (err) {
     if (
-      err.name === 'SequelizeUniqueConstraintError' &&
-      err.errors.length > 0 &&
-      err.errors[0].path === 'publicAddress'
+      err.name === 'SequelizeUniqueConstraintError'
+      && err.errors.length > 0
+      && err.errors[0].path === 'publicAddress'
     ) {
       return next(createError(409, 'The address is already registered'));
     }
@@ -117,9 +117,8 @@ router.get('/memberships/:address', async (req, res, next) => {
     now.setMilliseconds(now.getMilliseconds() - (process.env.SUMSUB_RENEW_INTERVAL || 1));
 
     if (
-      (m.status === Membership.Status.init.name ||
-       m.status === Membership.Status.pending.name) &&
-       m.updatedAt < now
+      (m.status === Membership.Status.init.name || m.status === Membership.Status.pending.name)
+       && m.updatedAt < now
     ) {
       const result = await getApplicantStatus(m.applicantId);
       if (result === 'verified') { await m.verify(); }

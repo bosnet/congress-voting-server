@@ -263,16 +263,16 @@ const sumsubApplicant = (id, address) => {
               country: null,
               includedCountries: null,
               excludedCountries: null,
-              docSets: [ {}, {}, {} ],
+              docSets: [{}, {}, {}],
             },
             review: {
               createDate: '2018-11-10 07:58:13+0000',
               reviewStatus: 'pending',
-              notificationFailureCnt: 0 ,
+              notificationFailureCnt: 0,
             },
-            lang: 'ko' ,
+            lang: 'ko',
           }],
-          totalItems: 1
+          totalItems: 1,
         },
       });
   }
@@ -302,16 +302,16 @@ const sumsubApplicantByExternalId = (id, address) => {
               country: null,
               includedCountries: null,
               excludedCountries: null,
-              docSets: [ {}, {}, {} ],
+              docSets: [{}, {}, {}],
             },
             review: {
               createDate: '2018-11-10 07:58:13+0000',
               reviewStatus: 'pending',
-              notificationFailureCnt: 0 ,
+              notificationFailureCnt: 0,
             },
-            lang: 'ko' ,
+            lang: 'ko',
           }],
-          totalItems: 1
+          totalItems: 1,
         },
       });
   }
