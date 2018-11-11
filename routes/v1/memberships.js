@@ -4,7 +4,12 @@ const { hash, verify } = require('sebakjs-util');
 
 const { Membership, Proposal } = require('../../models/index');
 const { underscored } = require('../utils');
-const { getApplicantStatus, getAccessToken } = require('../../lib/sumsub');
+const {
+  getApplicantStatus,
+  getAccessToken,
+  getApplicant,
+  getApplicantByAddress,
+} = require('../../lib/sumsub');
 const { currentHeight, getAccount } = require('../../lib/sebak');
 
 const { SEBAK_NETWORKID = 'sebak-test-network' } = process.env;
@@ -18,12 +23,9 @@ router.post('/memberships', async (req, res, next) => {
       return next(createError(400, 'there is no data'));
     }
 
-    const [publicAddress, applicantId] = req.body.data;
+    const [publicAddress] = req.body.data;
     if (!publicAddress) {
       return next(createError(400, 'public address is required.'));
-    }
-    if (!applicantId) {
-      return next(createError(400, 'applicant id is required.'));
     }
 
     // check signature
@@ -39,11 +41,17 @@ router.post('/memberships', async (req, res, next) => {
 
     const m = await Membership.register({
       publicAddress,
-      applicantId,
-      status: Membership.Status.pending.name,
+      status: Membership.Status.init.name,
     }, req.body.signature);
     return res.json(underscored(m.toJSON()));
   } catch (err) {
+    if (
+      err.name === 'SequelizeUniqueConstraintError' &&
+      err.errors.length > 0 &&
+      err.errors[0].path === 'publicAddress'
+    ) {
+      return next(createError(409, 'The address is already registered'));
+    }
     return next(err);
   }
 });
@@ -54,7 +62,14 @@ router.post('/memberships/sumsub/callback', async (req, res, next) => {
     if (req.body.type === 'INSPECTION_REVIEW_COMPLETED') {
       // externalUserId is public address
       const m = await Membership.findByAddress(req.body.externalUserId);
-      if (!m) { return res.status(404).json({}); }
+      if (!m) { return res.json({}); }
+
+      if (!m.applicantId) {
+        const applicantData = await getApplicantByAddress(req.body.externalUserId);
+        if (applicantData && applicantData.id) {
+          await m.pend(applicantData.id);
+        }
+      }
 
       if (req.body.review && req.body.review.reviewAnswer === 'GREEN') {
         // verification passed
@@ -62,6 +77,15 @@ router.post('/memberships/sumsub/callback', async (req, res, next) => {
       } else if (req.body.review && req.body.review.reviewAnswer === 'RED') {
         // verification failed
         await m.reject();
+      }
+    } else if (req.body.type === 'JOB_FINISHED') {
+      const applicantData = await getApplicant(req.body.applicantId);
+      if (applicantData && applicantData.externalUserId) {
+        const m = await Membership.findByAddress(applicantData.externalUserId);
+        if (!m) { return res.json({}); }
+        if (!m.applicantId) {
+          await m.pend(req.body.applicantId);
+        }
       }
     }
 
@@ -92,12 +116,58 @@ router.get('/memberships/:address', async (req, res, next) => {
     // SUMSUB_RENEW_INTERVAL is msec
     now.setMilliseconds(now.getMilliseconds() - (process.env.SUMSUB_RENEW_INTERVAL || 1));
 
-    if (m.status === Membership.Status.pending.name && m.updatedAt < now) {
+    if (
+      (m.status === Membership.Status.init.name ||
+       m.status === Membership.Status.pending.name) &&
+       m.updatedAt < now
+    ) {
       const result = await getApplicantStatus(m.applicantId);
       if (result === 'verified') { await m.verify(); }
       if (result === 'rejected') { await m.reject(); }
       if (result === 'pending') { await m.pend(); }
       await m.reload();
+    }
+
+    return res.json(underscored(m.toJSON()));
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// update membership information
+// currently only for applicantId
+router.put('/memberships/:address', async (req, res, next) => {
+  try {
+    const addr = req.params.address;
+    if (!req.body.data) {
+      return next(createError(400, 'there is no data'));
+    }
+
+    const [publicAddress, applicantId] = req.body.data;
+    if (!publicAddress) {
+      return next(createError(400, 'The public address is required.'));
+    }
+    if (!applicantId) {
+      return next(createError(400, 'The applicant id is required.'));
+    }
+    if (publicAddress !== addr) {
+      return next(createError(400, 'The public address is not matched.'));
+    }
+
+    // check signature
+    const verified = verify(
+      hash(req.body.data),
+      SEBAK_NETWORKID,
+      req.body.signature,
+      publicAddress,
+    );
+    if (!verified) {
+      return next(createError(400, 'The signature is invalid.'));
+    }
+
+    const m = await Membership.findByAddress(req.params.address);
+    if (m.status === Membership.Status.init.name) {
+      m.pend(applicantId);
     }
 
     return res.json(underscored(m.toJSON()));

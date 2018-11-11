@@ -18,8 +18,10 @@ describe('Membership /v1 API', () => {
       keypair = generate();
     });
 
+    after(mock.cleanAll);
+
     it('should register new membership', async () => {
-      const rlp = [keypair.address, cryptoRandomString(30)];
+      const rlp = [keypair.address];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
 
       await request(app)
@@ -33,8 +35,8 @@ describe('Membership /v1 API', () => {
         .expect(200);
     });
 
-    it('should reject without public_address or applicant_id', async () => {
-      const rlp = [keypair.address];
+    it('should reject without public_address', async () => {
+      const rlp = [];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
 
       await request(app)
@@ -49,7 +51,7 @@ describe('Membership /v1 API', () => {
     });
 
     it('should reject with wrong signature', async () => {
-      const rlp = [keypair.address, cryptoRandomString(30)];
+      const rlp = [keypair.address];
       const sig = sign(hash(rlp), 'wrong-netword-id', keypair.seed);
 
       await request(app)
@@ -65,18 +67,51 @@ describe('Membership /v1 API', () => {
   });
 
   describe('POST /memberships/sumsub/callback', () => {
-    const address = cryptoRandomString(56);
-    const applId = cryptoRandomString(24);
+    let address;
+    let applId;
+    let m;
 
-    before(async () => {
-      await Membership.register({
+    beforeEach(async () => {
+      address = cryptoRandomString(56);
+      applId = cryptoRandomString(24);
+
+      m = await Membership.register({
         publicAddress: address,
-        applicantId: applId,
-        status: Membership.Status.pending.name,
+        status: Membership.Status.init.name,
       });
     });
 
+    after(async () => {
+      await Membership.destroy({ where: {}, truncate: true });
+    });
+
+    it('should update pneding status and applicantId from sum&sub', async () => {
+      mock.sumsub.applicant(applId, address);
+
+      await request(app)
+        .post(`${urlPrefix}/memberships/sumsub/callback`)
+        .send({
+          applicantId: applId,
+          inspectionId: '5be68e460a975a2e44066c1a',
+          correlationId: 'req-2d74077d-32bd-4bc8-a041-035023fb01de',
+          jobId: '1d10cb62-f0d2-4db1-9848-bc80ddac768a',
+          type: 'JOB_FINISHED',
+          success: true,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const result = await Membership.findByAddress(address);
+      expect(result.status).to.equal(Membership.Status.pending.name);
+      expect(result.applicantId).to.equal(applId);
+
+      mock.cleanAll();
+    });
+
     it('should receive passed verification result from sum&sub', async () => {
+      m.pend(applId);
+
       await request(app)
         .post(`${urlPrefix}/memberships/sumsub/callback`)
         .send({
@@ -102,7 +137,39 @@ describe('Membership /v1 API', () => {
       expect(result.status).to.equal(Membership.Status.verified.name);
     });
 
+    it('should update pending status if it was init status', async () => {
+      mock.sumsub.applicantByExternalId(applId, address);
+
+      await request(app)
+        .post(`${urlPrefix}/memberships/sumsub/callback`)
+        .send({
+          applicantId: applId,
+          inspectionId: '5ba373130a975a04148d46a9',
+          correlationId: 'req-4cbee12c-49c1-4238-b53e-cb6342a4c2b0',
+          jobId: 'd1f40374-f248-4068-af0b-090796808d56',
+          externalUserId: address,
+          type: 'INSPECTION_REVIEW_COMPLETED',
+          review: {
+            reviewAnswer: 'GREEN',
+            label: 'OTHER',
+            rejectLabels: ['DOCUMENT_PAGE_MISSING'],
+            reviewRejectType: 'RETRY',
+          },
+          success: true,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const result = await Membership.findByAddress(address);
+      expect(result.applicantId).to.equal(applId);
+      expect(result.status).to.equal(Membership.Status.verified.name);
+
+      mock.cleanAll();
+    });
+
     it('should receive failed verification result from sum&sub', async () => {
+      m.pend(applId);
       await request(app)
         .post(`${urlPrefix}/memberships/sumsub/callback`)
         .send({
@@ -185,6 +252,38 @@ describe('Membership /v1 API', () => {
             done(err);
           });
       }, 100);
+    });
+  });
+
+  describe('PUT /memberships/:address', () => {
+    let keypair;
+
+    beforeEach(async () => {
+      keypair = generate();
+      await Membership.register({
+        publicAddress: keypair.address,
+        status: Membership.Status.init.name,
+      });
+    });
+
+    it('should update applicant id with pending status', async () => {
+      const applicantId = cryptoRandomString(24);
+      const rlp = [keypair.address, applicantId];
+      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
+
+      await request(app)
+        .put(`${urlPrefix}/memberships/${keypair.address}`)
+        .send({
+          data: rlp,
+          signature: sig,
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then((res) => {
+          expect(res.body).to.have.property('status').to.equal('pending');
+          expect(res.body).to.have.property('applicant_id').to.equal(applicantId);
+        });
     });
   });
 
@@ -301,7 +400,6 @@ describe('Membership /v1 API', () => {
     it('should return 400 if the membership status is not verified', async () => {
       const m = await Membership.register({
         publicAddress: keypair.address,
-        applicantId: cryptoRandomString(24),
       });
 
       const rlp = [keypair.address, frozenAddress];

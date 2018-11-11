@@ -2,16 +2,16 @@ const { Enum } = require('enumify');
 const { hash } = require('sebakjs-util');
 
 class Status extends Enum {}
-Status.initEnum(['pending', 'verified', 'rejected', 'active', 'deleted']);
+Status.initEnum(['init', 'pending', 'verified', 'rejected', 'active', 'deleted']);
 
 module.exports = (sequelize, DataTypes) => {
   const Membership = sequelize.define('Membership', {
     publicAddress: { type: DataTypes.STRING(60), allowNull: false, unique: true },
-    applicantId: { type: DataTypes.STRING(40), allowNull: false, unique: true },
+    applicantId: { type: DataTypes.STRING(40), unique: true },
     status: {
       type: DataTypes.ENUM,
       values: Status.enumValues.map(s => s.name),
-      defaultValue: Status.pending.name,
+      defaultValue: Status.init.name,
     },
     isAgreeDelegation: { type: DataTypes.BOOLEAN, defaultValue: false },
     activatedAt: { type: DataTypes.INTEGER },
@@ -66,14 +66,19 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // instance methods
-  Membership.prototype.pend = async function pend() {
-    if (this.status === Status.verified.name || this.status === Status.rejected.name) {
+  Membership.prototype.pend = async function pend(applicantId) {
+    if (this.status === Status.init.name) {
+      if (applicantId) {
+        await this.update({ applicantId, status: Status.pending.name });
+      } else {
+        await this.update({ status: Status.pending.name });
+      }
+    } else if (this.status === Status.verified.name || this.status === Status.rejected.name) {
       await this.update({ status: Status.pending.name });
-      await MembershipLog.register(this.toJSON());
     } else if (this.status === Status.pending.name) { // to renew updatedAt
       await Membership.update({ status: Status.pending.name }, { where: { id: this.id } });
-      await MembershipLog.register(Object.assign({ membershipId: this.id }, this.toJSON()));
     }
+    await MembershipLog.register(Object.assign({ membershipId: this.id }, this.toJSON()));
   };
 
   Membership.prototype.verify = async function verify() {

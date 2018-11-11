@@ -239,6 +239,84 @@ const sumsubAccessToken = (address) => {
   }
 };
 
+const sumsubApplicant = (id, address) => {
+  if (useMock) {
+    nock('https://test-api.sumsub.com:443', { encodedQueryParams: true })
+      .get(`/resources/applicants/${id}`)
+      .query({
+        key: process.env.SUMSUB_APIKEY,
+      })
+      .reply(200, {
+        list: {
+          items: [{
+            id,
+            createdAt: '2018-11-10 07:57:59',
+            clientId: 'boscoin',
+            inspectionId: '5be68f870a975a2e44066c32',
+            jobId: '2ab53a3d-dd09-4e92-992e-10f31f98076f',
+            externalUserId: address,
+            info: { country: 'KOR', idDocs: [{}] },
+            email: 'test@example.com',
+            env: 'test-api',
+            applicantPlatform: 'MacOSX',
+            requiredIdDocs: {
+              country: null,
+              includedCountries: null,
+              excludedCountries: null,
+              docSets: [ {}, {}, {} ],
+            },
+            review: {
+              createDate: '2018-11-10 07:58:13+0000',
+              reviewStatus: 'pending',
+              notificationFailureCnt: 0 ,
+            },
+            lang: 'ko' ,
+          }],
+          totalItems: 1
+        },
+      });
+  }
+};
+
+const sumsubApplicantByExternalId = (id, address) => {
+  if (useMock) {
+    nock('https://test-api.sumsub.com:443', { encodedQueryParams: true })
+      .get(`/resources/applicants/-;externalUserId=${address}`)
+      .query({
+        key: process.env.SUMSUB_APIKEY,
+      })
+      .reply(200, {
+        list: {
+          items: [{
+            id,
+            createdAt: '2018-11-10 07:57:59',
+            clientId: 'boscoin',
+            inspectionId: '5be68f870a975a2e44066c32',
+            jobId: '2ab53a3d-dd09-4e92-992e-10f31f98076f',
+            externalUserId: 'GCYRCKD3ITDTW3ZKJJEL44VRGEXLHXSUIQ4MNM73EXA4JXY3URJOJT5X14',
+            info: { country: 'KOR', idDocs: [{}] },
+            email: 'test@example.com',
+            env: 'test-api',
+            applicantPlatform: 'MacOSX',
+            requiredIdDocs: {
+              country: null,
+              includedCountries: null,
+              excludedCountries: null,
+              docSets: [ {}, {}, {} ],
+            },
+            review: {
+              createDate: '2018-11-10 07:58:13+0000',
+              reviewStatus: 'pending',
+              notificationFailureCnt: 0 ,
+            },
+            lang: 'ko' ,
+          }],
+          totalItems: 1
+        },
+      });
+  }
+};
+
 module.exports = {
   sebak: {
     currentHeight: sebakCurrentHeight,
@@ -249,6 +327,8 @@ module.exports = {
   sumsub: {
     applicantStatus: sumsubApplicantStatus,
     accessToken: sumsubAccessToken,
+    applicant: sumsubApplicant,
+    applicantByExternalId: sumsubApplicantByExternalId,
   },
   cleanAll: nock.cleanAll,
 };

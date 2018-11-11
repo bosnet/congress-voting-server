@@ -8,8 +8,7 @@ describe('Membership Model', () => {
   beforeEach(async () => {
     m = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      applicantId: cryptoRandomString(24),
-      status: Membership.Status.pending.name,
+      status: Membership.Status.init.name,
     });
   });
 
@@ -20,8 +19,7 @@ describe('Membership Model', () => {
   it('should register new membership', async () => {
     const result = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      applicantId: cryptoRandomString(24),
-      status: Membership.Status.pending.name,
+      status: Membership.Status.init.name,
     });
     expect(result).to.have.property('id');
   });
@@ -31,7 +29,8 @@ describe('Membership Model', () => {
     expect(result.id).to.equal(m.id);
   });
 
-  it('should verify a existing membership', async () => {
+  it('should verify a pending membership', async () => {
+    await m.pend();
     await m.verify();
 
     expect(m.status).to.equal(Membership.Status.verified.name);
@@ -40,16 +39,16 @@ describe('Membership Model', () => {
   it('should verify a existing membership only pending or rejected', async () => {
     const u = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      applicantId: cryptoRandomString(24),
-      status: Membership.Status.active.name,
+      status: Membership.Status.init.name,
     });
 
     await u.verify();
 
-    expect(u.status).to.equal(Membership.Status.active.name);
+    expect(u.status).to.equal(Membership.Status.init.name);
   });
 
   it('should reject a existing membership', async () => {
+    await m.pend();
     await m.reject();
 
     expect(m.status).to.equal(Membership.Status.rejected.name);
@@ -58,19 +57,17 @@ describe('Membership Model', () => {
   it('should reject a existing membership only pending or verified', async () => {
     const u = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      applicantId: cryptoRandomString(24),
-      status: Membership.Status.active.name,
+      status: Membership.Status.init.name,
     });
 
     await u.reject();
 
-    expect(u.status).to.equal(Membership.Status.active.name);
+    expect(u.status).to.equal(Membership.Status.init.name);
   });
 
   it('should activate a existing membership', async () => {
     const u = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      applicantId: cryptoRandomString(24),
       status: Membership.Status.verified.name,
     });
 
@@ -81,16 +78,29 @@ describe('Membership Model', () => {
   });
 
   it('should activate a existing membership only verified', async () => {
+    await m.pend();
     await m.activate(10);
 
     await m.reload();
     expect(m.status).to.equal(Membership.Status.pending.name);
   });
 
+  it('should pend an init membership with applicantId', async () => {
+    const u = await Membership.register({
+      publicAddress: cryptoRandomString(56),
+      status: Membership.Status.init.name,
+    });
+
+    const id = cryptoRandomString(24);
+    await u.pend(id);
+
+    expect(u.status).to.equal(Membership.Status.pending.name);
+    expect(u.applicantId).to.equal(id);
+  });
+
   it('should pend a existing membership', async () => {
     const u = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      applicantId: cryptoRandomString(24),
       status: Membership.Status.rejected.name,
     });
 
@@ -102,7 +112,6 @@ describe('Membership Model', () => {
   it('should pend a existing membership only verified or rejected', async () => {
     const u = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      applicantId: cryptoRandomString(24),
       status: Membership.Status.active.name,
     });
 
@@ -122,7 +131,6 @@ describe('Membership Model', () => {
   it('should register membership with deleted address', async () => {
     const newUser = {
       publicAddress: m.publicAddress,
-      applicantId: m.applicantId,
       status: Membership.Status.pending.name,
     };
     await m.deactivate(13);
