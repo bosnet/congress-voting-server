@@ -39,19 +39,21 @@ router.post('/memberships', async (req, res, next) => {
       return next(createError(400, 'The signature is invalid.'));
     }
 
-    const m = await Membership.register({
+
+    const m = await Membership.findByAddress(publicAddress);
+
+    if (m && m.status === Membership.Status.init.name) { // keep to progress KYC
+      return res.json(underscored(m.toJSON()));
+    } else if (m && m.status !== Membership.Status.init.name) {
+      return next(createError(409, 'The address is already registered'));
+    }
+
+    const member = await Membership.register({
       publicAddress,
       status: Membership.Status.init.name,
     }, req.body.signature);
-    return res.json(underscored(m.toJSON()));
+    return res.json(underscored(member.toJSON()));
   } catch (err) {
-    if (
-      err.name === 'SequelizeUniqueConstraintError'
-      && err.errors.length > 0
-      && err.errors[0].path === 'publicAddress'
-    ) {
-      return next(createError(409, 'The address is already registered'));
-    }
     return next(err);
   }
 });
