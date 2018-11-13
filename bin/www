@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require('newrelic');
+
 const debug = require('debug')('membership:server');
 const http = require('http');
 
