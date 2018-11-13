@@ -1,2 +1,2 @@
-BOScoin membership server
+BOScoin Congress Voting Server
 --------------
