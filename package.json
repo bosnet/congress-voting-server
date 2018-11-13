@@ -1,7 +1,7 @@
 {
-  "name": "membership-server",
+  "name": "boscoin-congres-voting-server",
   "version": "0.1.0",
-  "description": "BOScoin membership server",
+  "description": "BOScoin Congres Voting Server",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/owlchain/membership-server.git"
+    "url": "git+https://github.com/bosnet/congress-voting-desktop.git"
   },
   "author": "BlockchainOS",
   "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/owlchain/membership-server/issues"
+    "url": "https://github.com/bosnet/congress-voting-desktop/issues"
   },
-  "homepage": "https://github.com/owlchain/membership-server#readme",
+  "homepage": "https://github.com/bosnet/congress-voting-desktop#readme",
   "dependencies": {
     "aws-sdk": "^2.351.0",
     "camelcase": "^5.0.0",
