@@ -1,6 +1,7 @@
 const express = require('express');
 const createError = require('http-errors');
 const { hash, verify } = require('sebakjs-util');
+const debug = require('debug')('voting:routes:membership');
 
 const { Membership, Proposal } = require('../../models/index');
 const { underscored } = require('../utils');
@@ -19,6 +20,7 @@ const router = express.Router();
 // create new membership (signature required)
 router.post('/memberships', async (req, res, next) => {
   try {
+    debug('POST /memberships %o', req.body);
     if (!req.body.data) {
       return next(createError(400, 'there is no data'));
     }
@@ -61,6 +63,7 @@ router.post('/memberships', async (req, res, next) => {
 // callback to get verification result from Sub&Substance
 router.post('/memberships/sumsub/callback', async (req, res, next) => {
   try {
+    debug('POST /memberships/sumsub/callback %o', req.body);
     if (req.body.type === 'INSPECTION_REVIEW_COMPLETED') {
       // externalUserId is public address
       const m = await Membership.findByAddress(req.body.externalUserId);
@@ -100,6 +103,7 @@ router.post('/memberships/sumsub/callback', async (req, res, next) => {
 // obtain access token from sum&sub
 router.get('/memberships/sumsub/access-token/:address', async (req, res, next) => {
   try {
+    debug('GET /memberships/sumsub/access-token/:address %s', req.params.address);
     const token = await getAccessToken(req.params.address);
 
     return res.json({ data: token });
@@ -111,6 +115,7 @@ router.get('/memberships/sumsub/access-token/:address', async (req, res, next) =
 // find an existing membership
 router.get('/memberships/:address', async (req, res, next) => {
   try {
+    debug('GET /memberships/:address %s', req.params.address);
     const m = await Membership.findByAddress(req.params.address);
     if (!m) { return next(createError(404, 'The address does not exist.')); }
 
@@ -139,6 +144,7 @@ router.get('/memberships/:address', async (req, res, next) => {
 // currently only for applicantId
 router.put('/memberships/:address', async (req, res, next) => {
   try {
+    debug('PUT /memberships/:address %s %o', req.params.address, req.body);
     const addr = req.params.address;
     if (!req.body.data) {
       return next(createError(400, 'there is no data'));
@@ -179,6 +185,7 @@ router.put('/memberships/:address', async (req, res, next) => {
 
 // delete an existing membership (signature required)
 router.delete('/memberships/:address', async (req, res, next) => {
+  debug('DELETE /memberships/:address %s %s', req.params.address, req.query.sig);
   try {
     const addr = req.params.address;
     const { sig } = req.query;
@@ -212,6 +219,7 @@ router.delete('/memberships/:address', async (req, res, next) => {
 // activate an existing membership (signature required)
 router.post('/memberships/:address/activate', async (req, res, next) => {
   try {
+    debug('POST /memberships/:address/activate %s %o', req.params.address, req.body);
     const m = await Membership.findByAddress(req.params.address);
     if (!m) { return next(createError(404, 'The address does not exist.')); }
 
