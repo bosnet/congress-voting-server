@@ -30,6 +30,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   const status = err.status || 500;
   // TODO: error logging(sentry?)
   if (status >= 500) {
+    console.error(err);
     logger.error(err);
   }
   res.status(status).json({
