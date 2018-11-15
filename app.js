@@ -4,10 +4,16 @@ const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const Sentry = require('@sentry/node');
 
 const logger = require('./lib/logger');
 
 const app = express();
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({ dsn: process.env.SENTRY_DSN });
+  app.use(Sentry.Handlers.requestHandler());
+}
 
 app.use(morgan('dev'));
 app.use(cors());
@@ -24,6 +30,11 @@ app.use('/api/v1', require('./routes/v1/proposals'));
 app.use((req, res, next) => {
   next(createError(404));
 });
+
+
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // error handler
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
