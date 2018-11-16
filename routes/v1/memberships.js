@@ -11,7 +11,7 @@ const {
   getApplicant,
   getApplicantByAddress,
 } = require('../../lib/sumsub');
-const { currentHeight, getAccount } = require('../../lib/sebak');
+const { currentHeight, getAccount, getFrozenAccounts } = require('../../lib/sebak');
 
 const { SEBAK_NETWORKID = 'sebak-test-network' } = process.env;
 
@@ -225,26 +225,13 @@ router.post('/memberships/:address/activate', async (req, res, next) => {
     const m = await Membership.findByAddress(req.params.address);
     if (!m) { return next(createError(404, 'The address does not exist.')); }
 
-    const [publicAddress, frozenAddress] = req.body.data;
-    if (publicAddress !== req.params.address) {
-      return next(createError(400, 'The address does not match.'));
-    }
-
-    // check signature
-    const verified = verify(
-      hash(req.body.data),
-      SEBAK_NETWORKID,
-      req.body.signature,
-      publicAddress,
-    );
-    if (!verified) {
-      return next(createError(400, 'The signature is invalid.'));
-    }
-
-    // check it is frozen in sebak
-    const account = await getAccount(frozenAddress);
-    if (!account || (account && account.linked !== publicAddress)) {
-      return next(createError(400, 'The frozen address is incorrect.'));
+    // check frozen accounts in sebak
+    const accounts = await getFrozenAccounts(req.params.address);
+    const hasFrozen = accounts && accounts._embedded
+      && accounts._embedded.records
+      && accounts._embedded.records.some(r => r.state === 'frozen');
+    if (!hasFrozen) {
+      return next(createError(400, 'There is no frozen account'));
     }
 
     const height = await currentHeight();

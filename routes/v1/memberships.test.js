@@ -368,7 +368,7 @@ describe('Membership /v1 API', () => {
       keypair = generate();
       frozenAddress = cryptoRandomString(40);
       mock.sebak.currentHeight(expectedHeight);
-      mock.sebak.getFrozenAccount(frozenAddress, keypair.address);
+      mock.sebak.getFrozenAccounts(frozenAddress, keypair.address);
     });
 
     it('should activate an existing membership', async () => {
@@ -378,15 +378,8 @@ describe('Membership /v1 API', () => {
         status: Membership.Status.verified.name,
       });
 
-      const rlp = [keypair.address, frozenAddress];
-      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
-
       await request(app)
         .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
-        .send({
-          data: rlp,
-          signature: sig,
-        })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -402,58 +395,24 @@ describe('Membership /v1 API', () => {
         publicAddress: keypair.address,
       });
 
-      const rlp = [keypair.address, frozenAddress];
-      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
-
       await request(app)
         .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
-        .send({
-          data: rlp,
-          signature: sig,
-        })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(400);
     });
 
-    it('should return 400 if given signature is invalid', async () => {
-      const m = await Membership.register({
-        publicAddress: keypair.address,
-        applicantId: cryptoRandomString(24),
-        status: Membership.Status.verified.name,
-      });
-
-      const rlp = [keypair.address, frozenAddress];
-      const sig = sign(hash(rlp), 'wrong-network-id', keypair.seed);
-
-      await request(app)
-        .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
-        .send({
-          data: rlp,
-          signature: sig,
-        })
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(400);
-    });
-
-    it('should return 400 if given frozen address is invalid', async () => {
+    it('should return 400 if there is no fozen account', async () => {
       const key = generate();
+      mock.sebak.getFrozenAccounts(frozenAddress, key.address, false);
       const m = await Membership.register({
         publicAddress: key.address,
         applicantId: cryptoRandomString(24),
         status: Membership.Status.verified.name,
       });
 
-      const rlp = [key.address, frozenAddress];
-      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, key.seed);
-
       await request(app)
         .post(`${urlPrefix}/memberships/${m.publicAddress}/activate`)
-        .send({
-          data: rlp,
-          signature: sig,
-        })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(400);

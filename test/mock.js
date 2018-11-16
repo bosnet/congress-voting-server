@@ -104,6 +104,44 @@ const sebakGetFrozenAccount = (expectedAddress, expectedLinkedAddress) => {
   }
 };
 
+const sebakGetFrozenAccounts = (expectedAddress, expectedLinkedAddress, hasFrozen = true) => {
+  if (useMock) {
+    nock(SEBAK_URL, { encodedQueryParams: true })
+      .get(`${SEBAK_PREFIX}/accounts/${expectedLinkedAddress}/frozen-accounts`)
+      .reply(200, {
+        _embedded: {
+           records: hasFrozen ? [
+             {
+               _links: [],
+               address: expectedAddress,
+               amount: '100000000000',
+               create_block_height: 4028,
+               create_op_hash: 'CkfHuoDv6twmBvQ8kw5hgR42d3xh4xJMsCT7LSBzkUxD',
+               linked: expectedLinkedAddress,
+               payment_op_hash: '',
+               sequence_id: 0,
+               state: 'frozen',
+               unfreezing_block_height: 0,
+               unfreezing_op_hash: '',
+               unfreezing_remaining_blocks: 0
+             }
+           ] : ''
+        },
+        _links: {
+          next: {
+            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts?limit=100&reverse=false'
+          },
+          prev: {
+            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts?limit=100&reverse=true'
+          },
+          self: {
+            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts'
+          }
+        }
+      });
+  }
+};
+
 const sumsubApplicantStatus = (success, failed, pending) => {
   if (useMock) {
     nock('https://test-api.sumsub.com:443', { encodedQueryParams: true })
@@ -323,6 +361,7 @@ module.exports = {
     getProposals: sebakGetProposals,
     confirmVotingResult: sebakConfirmVotingResult,
     getFrozenAccount: sebakGetFrozenAccount,
+    getFrozenAccounts: sebakGetFrozenAccounts,
   },
   sumsub: {
     applicantStatus: sumsubApplicantStatus,
