@@ -44,7 +44,7 @@ router.post('/memberships', async (req, res, next) => {
 
     const m = await Membership.findByAddress(publicAddress);
 
-    if (m && m.status === Membership.Status.init.name) { // keep to progress KYC
+    if (m && (m.status === Membership.Status.init.name || m.status === Membership.Status.rejected.name)) { // keep to progress KYC
       return res.json(underscored(m.toJSON()));
     } else if (m && m.status !== Membership.Status.init.name) {
       return next(createError(409, 'The address is already registered'));
@@ -175,6 +175,8 @@ router.put('/memberships/:address', async (req, res, next) => {
     const m = await Membership.findByAddress(req.params.address);
     if (m.status === Membership.Status.init.name) {
       m.pend(applicantId);
+    } else if (m.status === Membership.Status.rejected.name && applicantId === 'ApplicantResubmitted') {
+      m.pend();
     }
 
     return res.json(underscored(m.toJSON()));
@@ -216,7 +218,7 @@ router.delete('/memberships/:address', async (req, res, next) => {
   }
 });
 
-// activate an existing membership (signature required)
+// activate an existing membership
 router.post('/memberships/:address/activate', async (req, res, next) => {
   try {
     debug('POST /memberships/:address/activate %s %o', req.params.address, req.body);
