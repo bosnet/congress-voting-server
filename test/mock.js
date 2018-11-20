@@ -142,6 +142,63 @@ const sebakGetFrozenAccounts = (expectedAddress, expectedLinkedAddress, hasFroze
   }
 };
 
+const sebakGetAccount = (address) => {
+  if (useMock) {
+    nock(SEBAK_URL, { encodedQueryParams: true })
+      .get(`${SEBAK_PREFIX}/accounts/${address}`)
+      .reply(200, {
+        '_links': {
+          operations: {
+            href: `/api/v1/accounts/${address}/operations{?cursor,limit,order}`,
+            templated: true
+          },
+          self: {
+            href: `/api/v1/accounts/${address}`
+          },
+          transactions: {
+            href: `/api/v1/accounts/${address}/transactions{?cursor,limit,order}`,
+            templated: true
+          }
+        },
+        address,
+        balance: `199999999960000`,
+        linked: '',
+        sequence_id: 4
+      });
+  }
+};
+
+const sebakNewProposal = (address, success = true) => {
+  if (useMock) {
+    nock(SEBAK_URL, { encodedQueryParams: true })
+      .post(`${SEBAK_PREFIX}/transactions`)
+      .reply(success ? 200 : 400, {
+        _links: {
+          history: {
+            href: '/api/v1/transactions/5pkcMCD7o1RHu2fU3phYvC68t3ZAXbmq27hjwqauVBS2/history'
+          },
+          self: { href: '/api/v1/transactions' }
+        },
+        hash: '5pkcMCD7o1RHu2fU3phYvC68t3ZAXbmq27hjwqauVBS2',
+        message: {
+          source: address,
+          fee: '10000',
+          sequence_id: 0,
+          operations: [{
+            H: { type: 'congress-voting' },
+            B: {
+              contract: 'dHlwZTogbWV0YQoKdGl0bGU6IE1lbWJlcnNoaXAgUmV3YXJkIFBGCgppZDogUEZfUl8wMC0wMDAtQQoKcHJvcG9zZXI6IEJsb2NrY2hhaW5PUyBJbmMKCnByb3Bvc2VyX2FjY291bnQ6IEdCTlVUV1NNNEZSU0VVTFZNSFpGN05GUVdJQkdFREY1WDVPSFhGT1pKQjZTSDVNSUVERUpFSjJGCgpleGVjdXRpb25fZHVyYXRpb246IDYzMDcyMDAKCmFtb3VudF9vZl9pc3N1YW5jZTogMTYwODMzNjAwCgpwZl9idWRnZXRfYWNjb3VudDogR0JXQ01XRFVaSzY3WU5VWjQ0VVBOVkZZWlJTQ0NTNE9MRTZPUldENFpMSTJNVkdZNEtKRFBITU8K',
+              voting: { start: 300, end: 500 },
+              funding_address: 'GBWCMWDUZK67YNUZ44UPNVFYZRSCCS4OLE6ORWD4ZLI2MVGY4KJDPHMO',
+              amount: '160833600'
+            }
+          }],
+        },
+        status: 'submitted',
+      });
+  }
+};
+
 const sumsubApplicantStatus = (success, failed, pending) => {
   if (useMock) {
     nock('https://test-api.sumsub.com:443', { encodedQueryParams: true })
@@ -362,6 +419,8 @@ module.exports = {
     confirmVotingResult: sebakConfirmVotingResult,
     getFrozenAccount: sebakGetFrozenAccount,
     getFrozenAccounts: sebakGetFrozenAccounts,
+    newProposal: sebakNewProposal,
+    getAccount: sebakGetAccount,
   },
   sumsub: {
     applicantStatus: sumsubApplicantStatus,

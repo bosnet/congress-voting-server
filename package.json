@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "batch": "node ./bin/batch",
+    "task": "node ./bin/task",
     "test": "mocha --exit --recursive -t 20000 $(find . -name '*.test.js' -not -path './node_modules/*')",
     "lint": "eslint .",
     "dev": "nodemon npm start | pino-pretty",
@@ -34,16 +34,17 @@
     "express": "~4.16.0",
     "got": "^9.2.2",
     "http-errors": "~1.6.2",
+    "js-yaml": "^3.12.0",
     "moment": "^2.22.2",
     "morgan": "~1.9.0",
     "newrelic": "^4.10.0",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
     "pino": "^5.8.0",
+    "rlp": "^2.1.0",
     "sebakjs-util": "^0.1.1",
     "sequelize": "^4.38.1",
-    "uuid": "^3.3.2",
-    "yaml": "^1.0.1"
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
