@@ -14,7 +14,22 @@ const router = express.Router();
 router.get('/proposals', async (req, res, next) => {
   try {
     const prs = await Proposal.list();
-    const result = prs.map(p => underscored(p.toJSON()));
+    const height = await currentHeight();
+    const result = prs.map((p) => {
+      const pr = underscored(p.toJSON())
+      const start = parseInt(pr.start, 10);
+      const end = parseInt(pr.end, 10);
+      if (height < start) {
+        pr.state = 'open-before';
+        pr.remain = height - start;
+      } else if (height > end){
+        pr.state = 'closed';
+      } else {
+        pr.state = 'opened';
+        pr.remain = end - height;
+      }
+      return pr;
+    });
 
     return res.json({
       data: result,
