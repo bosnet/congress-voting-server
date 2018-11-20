@@ -28,8 +28,8 @@ module.exports = (sequelize, DataTypes) => {
     return null;
   };
 
-  Proposal.findByHash = async function findByHash(hash) {
-    return this.findOne({ where: { hash } });
+  Proposal.findByOpHash = async function findByOpHash(opHash) {
+    return this.findOne({ where: { opHash } });
   };
 
   Proposal.findById = async function findById(id) {

@@ -327,7 +327,7 @@ describe('Membership /v1 API', () => {
         content: '# PF00',
         start: 50,
         end: 150,
-        hash: cryptoRandomString(30),
+        opHash: cryptoRandomString(30),
       });
       const rlp = [keypair.address];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);

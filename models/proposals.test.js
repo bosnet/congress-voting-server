@@ -20,7 +20,7 @@ describe('Proposal Model', () => {
         content: '# PF00',
         start: 100,
         end: 200,
-        hash: cryptoRandomString(30),
+        opHash: cryptoRandomString(30),
       });
       expect(result).to.have.property('id');
     });
@@ -32,7 +32,7 @@ describe('Proposal Model', () => {
         content: '# PF00',
         start: 100,
         end: 200,
-        hash: cryptoRandomString(30),
+        opHash: cryptoRandomString(30),
       };
 
       await Proposal.register(pr);
@@ -50,7 +50,7 @@ describe('Proposal Model', () => {
         content: '# Example proposal',
         start: 100,
         end: 200,
-        hash: cryptoRandomString(30),
+        opHash: cryptoRandomString(30),
       });
     });
 
@@ -58,8 +58,8 @@ describe('Proposal Model', () => {
       await Proposal.destroy({ where: {}, truncate: true });
     });
 
-    it('should return the proposal by hash', async () => {
-      const result = await Proposal.findByHash(m.hash);
+    it('should return the proposal by opHash', async () => {
+      const result = await Proposal.findByOpHash(m.opHash);
       expect(result.id).to.equal(m.id);
     });
 
@@ -88,7 +88,7 @@ describe('Proposal Model', () => {
         content: '# Example proposal',
         start: 100,
         end: 200,
-        hash: h1,
+        opHash: h1,
         reported: false,
         reportConfirmed: false,
       });
@@ -99,7 +99,7 @@ describe('Proposal Model', () => {
         content: '# Example proposal',
         start: 100,
         end: 150,
-        hash: h2,
+        opHash: h2,
         reported: false,
         reportConfirmed: false,
       });
@@ -115,21 +115,21 @@ describe('Proposal Model', () => {
     });
 
     it('should update an proposal as reported', async () => {
-      const p = await Proposal.findByHash(h2);
+      const p = await Proposal.findByOpHash(h2);
       await p.report();
       const result = await Proposal.listToReport(160);
       expect(result).to.have.lengthOf(0);
     });
 
     it('should return proposal list to check if result is confirmed', async () => {
-      const p = await Proposal.findByHash(h2);
+      const p = await Proposal.findByOpHash(h2);
       await p.report();
       const result = await Proposal.listToConfirm(160);
       expect(result).to.have.lengthOf(1);
     });
 
     it('should update an proposal as report confirmed', async () => {
-      const p = await Proposal.findByHash(h2);
+      const p = await Proposal.findByOpHash(h2);
       await p.report();
       await p.confirmReport();
       const result = await Proposal.listToConfirm(160);
@@ -151,7 +151,7 @@ describe('Proposal Model', () => {
         content: '# Example proposal',
         start: 81,
         end: 130,
-        hash: h1,
+        opHash: h1,
         reported: false,
         reportConfirmed: false,
       });
@@ -162,7 +162,7 @@ describe('Proposal Model', () => {
         content: '# Example proposal',
         start: 120,
         end: 150,
-        hash: h2,
+        opHash: h2,
         reported: false,
         reportConfirmed: false,
       });

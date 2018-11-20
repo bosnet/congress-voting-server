@@ -18,7 +18,7 @@ describe('Proposals /v1 API', () => {
         content: '# PF00',
         start: 100,
         end: 200,
-        hash: cryptoRandomString(30),
+        opHash: cryptoRandomString(30),
       });
     });
 
@@ -45,7 +45,7 @@ describe('Proposals /v1 API', () => {
         content: '# PF00',
         start: 100,
         end: 200,
-        hash: cryptoRandomString(30),
+        opHash: cryptoRandomString(30),
       });
       proposalId = m.id;
     });
@@ -76,7 +76,7 @@ describe('Proposals /v1 API', () => {
         content: '# PF00',
         start: 100,
         end: 200,
-        hash: cryptoRandomString(30),
+        opHash: cryptoRandomString(30),
       });
       proposalId = m.id;
       keypair = generate();
