@@ -11,7 +11,7 @@ const {
   getApplicant,
   getApplicantByAddress,
 } = require('../../lib/sumsub');
-const { currentHeight, getAccount, getFrozenAccounts } = require('../../lib/sebak');
+const { currentHeight, getFrozenAccounts } = require('../../lib/sebak');
 
 const { SEBAK_NETWORKID = 'sebak-test-network' } = process.env;
 
@@ -44,9 +44,12 @@ router.post('/memberships', async (req, res, next) => {
 
     const m = await Membership.findByAddress(publicAddress);
 
-    if (m && (m.status === Membership.Status.init.name || m.status === Membership.Status.rejected.name)) { // keep to progress KYC
+    if (m
+      && (m.status === Membership.Status.init.name || m.status === Membership.Status.rejected.name)
+    ) { // keep to progress KYC
       return res.json(underscored(m.toJSON()));
-    } else if (m && m.status !== Membership.Status.init.name) {
+    }
+    if (m && m.status !== Membership.Status.init.name) {
       return next(createError(409, 'The address is already registered'));
     }
 
@@ -227,9 +230,9 @@ router.post('/memberships/:address/activate', async (req, res, next) => {
 
     // check frozen accounts in sebak
     const accounts = await getFrozenAccounts(req.params.address);
-    const hasFrozen = accounts && accounts._embedded
-      && accounts._embedded.records
-      && accounts._embedded.records.some(r => r.state === 'frozen');
+    const hasFrozen = accounts && accounts._embedded // eslint-disable-line no-underscore-dangle
+      && accounts._embedded.records // eslint-disable-line no-underscore-dangle
+      && accounts._embedded.records.some(r => r.state === 'frozen'); // eslint-disable-line no-underscore-dangle
     if (!hasFrozen) {
       return next(createError(400, 'There is no frozen account'));
     }

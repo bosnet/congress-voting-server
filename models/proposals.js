@@ -6,10 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     content: { type: DataTypes.TEXT, allowNull: false },
     start: { type: DataTypes.BIGINT },
     end: { type: DataTypes.BIGINT },
-    hash: { type: DataTypes.STRING(100), allowNull: false, unique: true },
+    opHash: { type: DataTypes.STRING(200), allowNull: false, unique: true },
     txHash: { type: DataTypes.STRING(200), allowNull: true },
+    blockHash: { type: DataTypes.STRING(200), allowNull: true },
     proposerAddress: { type: DataTypes.STRING(200), allowNull: true },
-    blockHeight: { type: DataTypes.BIGINT, allowNull: true },
+    fundingAddress: { type: DataTypes.STRING(100), allowNull: true },
+    amount: { type: DataTypes.STRING(100), allowNull: true },
     reported: { type: DataTypes.BOOLEAN, defaultValue: false },
     reportConfirmed: { type: DataTypes.BOOLEAN, defaultValue: false },
   }, {
@@ -19,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 
   // class methods
   Proposal.register = async function register(m) {
-    const exist = await this.findOne({ where: { hash: m.hash } });
+    const exist = await this.findOne({ where: { opHash: m.opHash } });
     if (!exist) {
       return this.build(m).save();
     }

@@ -110,34 +110,50 @@ const sebakGetFrozenAccounts = (expectedAddress, expectedLinkedAddress, hasFroze
       .get(`${SEBAK_PREFIX}/accounts/${expectedLinkedAddress}/frozen-accounts`)
       .reply(200, {
         _embedded: {
-           records: hasFrozen ? [
-             {
-               _links: [],
-               address: expectedAddress,
-               amount: '100000000000',
-               create_block_height: 4028,
-               create_op_hash: 'CkfHuoDv6twmBvQ8kw5hgR42d3xh4xJMsCT7LSBzkUxD',
-               linked: expectedLinkedAddress,
-               payment_op_hash: '',
-               sequence_id: 0,
-               state: 'frozen',
-               unfreezing_block_height: 0,
-               unfreezing_op_hash: '',
-               unfreezing_remaining_blocks: 0
-             }
-           ] : ''
+          records: hasFrozen ? [
+            {
+              _links: [],
+              address: expectedAddress,
+              amount: '100000000000',
+              create_block_height: 4028,
+              create_op_hash: 'CkfHuoDv6twmBvQ8kw5hgR42d3xh4xJMsCT7LSBzkUxD',
+              linked: expectedLinkedAddress,
+              payment_op_hash: '',
+              sequence_id: 0,
+              state: 'frozen',
+              unfreezing_block_height: 0,
+              unfreezing_op_hash: '',
+              unfreezing_remaining_blocks: 0,
+            },
+          ] : '',
         },
         _links: {
           next: {
-            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts?limit=100&reverse=false'
+            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts?limit=100&reverse=false',
           },
           prev: {
-            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts?limit=100&reverse=true'
+            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts?limit=100&reverse=true',
           },
           self: {
-            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts'
-          }
-        }
+            href: '/api/v1/accounts/GB53I47X475OOIN5FSDILXJMGVUTRJWVQV5ODF2QEYF6JYV3ZPKMUERE/frozen-accounts',
+          },
+        },
+      });
+  }
+};
+
+const sebakGetTransaction = (hash) => {
+  if (useMock) {
+    nock(SEBAK_URL, { encodedQueryParams: true })
+      .get(`${SEBAK_PREFIX}/transactions/${hash}`)
+      .reply(200, {
+        block: 'b21y7uXTHkQHrhpCusJpQwdXxFCUPA2t4epUEJ6esHk',
+        created: '2018-11-20T10:45:03.575000000+09:00',
+        fee: '10000',
+        hash: '2uTT2gdhftR7iY4Prbh8hMJ2q5nUuraGXpTYUrHjFote',
+        operation_count: 1,
+        sequence_id: 0,
+        source: 'GCT67AX6PSARM47MJYAEMAQTS4LQRJDJFSMBAEEKHVCDIP5VRC3P2RPC',
       });
   }
 };
@@ -147,23 +163,57 @@ const sebakGetAccount = (address) => {
     nock(SEBAK_URL, { encodedQueryParams: true })
       .get(`${SEBAK_PREFIX}/accounts/${address}`)
       .reply(200, {
-        '_links': {
+        _links: {
           operations: {
             href: `/api/v1/accounts/${address}/operations{?cursor,limit,order}`,
-            templated: true
+            templated: true,
           },
           self: {
-            href: `/api/v1/accounts/${address}`
+            href: `/api/v1/accounts/${address}`,
           },
           transactions: {
             href: `/api/v1/accounts/${address}/transactions{?cursor,limit,order}`,
-            templated: true
-          }
+            templated: true,
+          },
         },
         address,
-        balance: `199999999960000`,
+        balance: '199999999960000',
         linked: '',
-        sequence_id: 4
+        sequence_id: 4,
+      });
+  }
+};
+
+const sebakGetAccountOperations = (address, params = '', expectedOps) => {
+  if (useMock) {
+    nock(SEBAK_URL, { encodedQueryParams: true })
+      .get(`${SEBAK_PREFIX}/accounts/${address}/operations${params}`)
+      .reply(200, {
+        _embedded: {
+          records: expectedOps.map(o => ({
+            body: {
+              contract: 'dHlwZTogbWV0YQoKdGl0bGU6IE1lbWJlcnNoaXAgUmV3YXJkIFBGCgppZDogUEZfUl8wMC0wMDAtQQoKcHJvcG9zZXI6IEJsb2NrY2hhaW5PUyBJbmMKCnByb3Bvc2VyX2FjY291bnQ6IEdCTlVUV1NNNEZSU0VVTFZNSFpGN05GUVdJQkdFREY1WDVPSFhGT1pKQjZTSDVNSUVERUpFSjJGCgpleGVjdXRpb25fZHVyYXRpb246IDYzMDcyMDAKCmFtb3VudF9vZl9pc3N1YW5jZTogMTYwODMzNjAwCgpwZl9idWRnZXRfYWNjb3VudDogR0JXQ01XRFVaSzY3WU5VWjQ0VVBOVkZZWlJTQ0NTNE9MRTZPUldENFpMSTJNVkdZNEtKRFBITU8K',
+              voting: { start: 300, end: 500 },
+              funding_address: 'GBWCMWDUZK67YNUZ44UPNVFYZRSCCS4OLE6ORWD4ZLI2MVGY4KJDPHMO',
+              amount: '160833600',
+            },
+            hash: 'GoswpDxK6MhE2AWGzPNUYKBueFLnWR4kvwimpDA4Gskt-5pkcMCD7o1RHu2fU3phYvC68t3ZAXbmq27hjwqauVBS2',
+            source: 'GCT67AX6PSARM47MJYAEMAQTS4LQRJDJFSMBAEEKHVCDIP5VRC3P2RPC',
+            tx_hash: o.tx_hash,
+            type: 'congress-voting',
+          })),
+        },
+        _links: {
+          next: {
+            href: `/api/v1/accounts/${address}/operations?limit=20&reverse=false`,
+          },
+          prev: {
+            href: `/api/v1/accounts/${address}/operations?limit=20&reverse=true`,
+          },
+          self: {
+            href: `/api/v1/accounts/${address}/operations?type=congress-voting&reverse=true`,
+          },
+        },
       });
   }
 };
@@ -175,9 +225,9 @@ const sebakNewProposal = (address, success = true) => {
       .reply(success ? 200 : 400, {
         _links: {
           history: {
-            href: '/api/v1/transactions/5pkcMCD7o1RHu2fU3phYvC68t3ZAXbmq27hjwqauVBS2/history'
+            href: '/api/v1/transactions/5pkcMCD7o1RHu2fU3phYvC68t3ZAXbmq27hjwqauVBS2/history',
           },
-          self: { href: '/api/v1/transactions' }
+          self: { href: '/api/v1/transactions' },
         },
         hash: '5pkcMCD7o1RHu2fU3phYvC68t3ZAXbmq27hjwqauVBS2',
         message: {
@@ -190,8 +240,8 @@ const sebakNewProposal = (address, success = true) => {
               contract: 'dHlwZTogbWV0YQoKdGl0bGU6IE1lbWJlcnNoaXAgUmV3YXJkIFBGCgppZDogUEZfUl8wMC0wMDAtQQoKcHJvcG9zZXI6IEJsb2NrY2hhaW5PUyBJbmMKCnByb3Bvc2VyX2FjY291bnQ6IEdCTlVUV1NNNEZSU0VVTFZNSFpGN05GUVdJQkdFREY1WDVPSFhGT1pKQjZTSDVNSUVERUpFSjJGCgpleGVjdXRpb25fZHVyYXRpb246IDYzMDcyMDAKCmFtb3VudF9vZl9pc3N1YW5jZTogMTYwODMzNjAwCgpwZl9idWRnZXRfYWNjb3VudDogR0JXQ01XRFVaSzY3WU5VWjQ0VVBOVkZZWlJTQ0NTNE9MRTZPUldENFpMSTJNVkdZNEtKRFBITU8K',
               voting: { start: 300, end: 500 },
               funding_address: 'GBWCMWDUZK67YNUZ44UPNVFYZRSCCS4OLE6ORWD4ZLI2MVGY4KJDPHMO',
-              amount: '160833600'
-            }
+              amount: '160833600',
+            },
           }],
         },
         status: 'submitted',
@@ -421,6 +471,8 @@ module.exports = {
     getFrozenAccounts: sebakGetFrozenAccounts,
     newProposal: sebakNewProposal,
     getAccount: sebakGetAccount,
+    getAccountOperations: sebakGetAccountOperations,
+    getTransaction: sebakGetTransaction,
   },
   sumsub: {
     applicantStatus: sumsubApplicantStatus,

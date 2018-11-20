@@ -1,9 +1,8 @@
-'use strict'
 exports.config = {
   app_name: [''],
   license_key: '',
   logging: {
-    level: 'info'
+    level: 'info',
   },
   allow_all_headers: true,
   attributes: {
@@ -17,8 +16,7 @@ exports.config = {
       'response.headers.authorization',
       'response.headers.proxyAuthorization',
       'response.headers.setCookie*',
-      'response.headers.x*'
-    ]
-  }
-}
-
+      'response.headers.x*',
+    ],
+  },
+};
