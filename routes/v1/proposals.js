@@ -53,6 +53,22 @@ router.get('/proposals/:id', async (req, res, next) => {
   }
 });
 
+// check vote to the proposal
+router.get('/proposals/:id/votes/:address', async (req, res, next) => {
+  try {
+    const pr = await Proposal.findById(req.params.id);
+    if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
+
+    const result = await Vote.findByAddress(pr.id, req.params.address);
+
+    return res.json({
+      data: !!result,
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // vote to a proposal(with signature)
 router.post('/proposals/:id/vote', async (req, res, next) => {
   try {
@@ -67,6 +83,11 @@ router.post('/proposals/:id/vote', async (req, res, next) => {
     const height = await currentHeight();
     if (height < pr.start || pr.end < height) {
       return next(createError(400, 'The proposal is not opened.'));
+    }
+
+    const isValidAnswer = Vote.Answer.enumValues.some(e => e.name === answer);
+    if (!isValidAnswer) {
+      return next(createError(400, 'The answer is wrong value.'));
     }
 
     // check signature
