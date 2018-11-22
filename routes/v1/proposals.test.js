@@ -37,7 +37,7 @@ describe('Proposals /v1 API', () => {
         .expect(200)
         .then((res) => {
           expect(res.body).to.have.property('data').to.have.lengthOf(1);
-        })
+        });
     });
 
     it('should return all proposals with open/close state', async () => {
@@ -63,8 +63,8 @@ describe('Proposals /v1 API', () => {
           expect(res.body.data[0]).to.have.property('remain').to.equal(80);
           expect(res.body.data[1]).to.have.property('state').to.equal('open-before');
           expect(res.body.data[1]).to.have.property('remain').to.equal(30);
-        })
-    })
+        });
+    });
   });
 
   describe('GET /proposals/:id', () => {

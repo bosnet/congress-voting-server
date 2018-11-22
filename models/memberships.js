@@ -65,6 +65,16 @@ module.exports = (sequelize, DataTypes) => {
     return d;
   };
 
+  Membership.findActiveMembers = async function activeMembers() {
+    const d = await this.findAll({
+      where: {
+        status: Status.active.name,
+      },
+    });
+
+    return d;
+  };
+
   // instance methods
   Membership.prototype.pend = async function pend(applicantId) {
     if (this.status === Status.init.name) {

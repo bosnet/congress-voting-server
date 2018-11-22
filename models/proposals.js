@@ -14,6 +14,18 @@ module.exports = (sequelize, DataTypes) => {
     amount: { type: DataTypes.STRING(100), allowNull: true },
     reported: { type: DataTypes.BOOLEAN, defaultValue: false },
     reportConfirmed: { type: DataTypes.BOOLEAN, defaultValue: false },
+
+    // voting result
+    resultMembershipHash: { type: DataTypes.STRING(150) },
+    resultMembershipPath: { type: DataTypes.STRING(150) },
+    resultVotersHash: { type: DataTypes.STRING(150) },
+    resultVotersPath: { type: DataTypes.STRING(150) },
+    resultBallotHash: { type: DataTypes.STRING(150) },
+    resultBallotPath: { type: DataTypes.STRING(150) },
+    resultCount: { type: DataTypes.INTEGER },
+    resultYes: { type: DataTypes.INTEGER },
+    resultNo: { type: DataTypes.INTEGER },
+    resultAbs: { type: DataTypes.INTEGER },
   }, {
     tableName: 'proposals',
     paranoid: true,
@@ -69,8 +81,20 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // instance methods
-  Proposal.prototype.report = async function report() {
-    return this.update({ reported: true });
+  Proposal.prototype.report = async function report(result) {
+    return this.update({
+      reported: true,
+      resultMembershipHash: result.membershipHash,
+      resultMembershipPath: result.membershipPath,
+      resultVotersHash: result.votersHash,
+      resultVotersPath: result.votersPath,
+      resultBallotHash: result.ballotHash,
+      resultBallotPath: result.ballotPath,
+      resultCount: result.count,
+      resultYes: result.yes,
+      resultNo: result.no,
+      resultAbs: result.abs,
+    });
   };
 
   Proposal.prototype.confirmReport = async function confirmReport() {

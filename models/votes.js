@@ -70,5 +70,9 @@ module.exports = (sequelize, DataTypes) => {
     return this.findOne({ where: { proposalId, publicAddress } });
   };
 
+  Vote.findByProposalId = async function findByProposalId(proposalId) {
+    return this.findAll({ where: { proposalId } });
+  };
+
   return Vote;
 };

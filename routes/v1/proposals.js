@@ -16,13 +16,13 @@ router.get('/proposals', async (req, res, next) => {
     const prs = await Proposal.list();
     const height = await currentHeight();
     const result = prs.map((p) => {
-      const pr = underscored(p.toJSON())
+      const pr = underscored(p.toJSON());
       const start = parseInt(pr.start, 10);
       const end = parseInt(pr.end, 10);
       if (height < start) {
         pr.state = 'open-before';
         pr.remain = height - start;
-      } else if (height > end){
+      } else if (height > end) {
         pr.state = 'closed';
       } else {
         pr.state = 'opened';
