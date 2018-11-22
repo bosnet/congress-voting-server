@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     proposerAddress: { type: DataTypes.STRING(200), allowNull: true },
     fundingAddress: { type: DataTypes.STRING(100), allowNull: true },
     amount: { type: DataTypes.STRING(100), allowNull: true },
+    conditionRatio: { type: DataTypes.FLOAT },
     reported: { type: DataTypes.BOOLEAN, defaultValue: false },
     reportConfirmed: { type: DataTypes.BOOLEAN, defaultValue: false },
 
