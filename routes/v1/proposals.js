@@ -21,9 +21,16 @@ router.get('/proposals', async (req, res, next) => {
       const end = parseInt(pr.end, 10);
       if (height < start) {
         pr.state = 'open-before';
-        pr.remain = height - start;
+        pr.remain = start - height;
       } else if (height > end) {
         pr.state = 'closed';
+        if (pr.report_confirmed) {
+          if (pr.result_yes - pr.result_no > pr.result_count * pr.condition_ratio) {
+            pr.result_final = 'passed';
+          } else {
+            pr.result_final = 'rejected';
+          }
+        }
       } else {
         pr.state = 'opened';
         pr.remain = end - height;
