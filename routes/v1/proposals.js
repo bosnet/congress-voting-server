@@ -46,6 +46,25 @@ router.get('/proposals', async (req, res, next) => {
   }
 });
 
+// checked ongoing proposals
+router.get('/proposals/ongoing', async (req, res, next) => {
+  try {
+    const prs = await Proposal.list();
+    const height = await currentHeight();
+    const has = prs.some((p) => {
+      const start = parseInt(p.start, 10);
+      const end = parseInt(p.end, 10);
+      return start <= height && height <= end;
+    });
+
+    return res.json({
+      data: has,
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // proposal detail
 router.get('/proposals/:id', async (req, res, next) => {
   try {
