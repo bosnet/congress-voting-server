@@ -50,7 +50,9 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   Proposal.list = async function list() {
-    return this.findAll({});
+    return this.findAll({
+      order: [['start', 'ASC']],
+    });
   };
 
   Proposal.listToReport = async function listToReport(currentBlock = 0) {
