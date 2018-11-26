@@ -130,6 +130,13 @@ router.get('/memberships/:address', async (req, res, next) => {
       (m.status === Membership.Status.init.name || m.status === Membership.Status.pending.name)
        && m.updatedAt < now
     ) {
+      if (!m.applicantId) {
+        const applicantData = await getApplicantByAddress(m.publicAddress);
+        if (applicantData && applicantData.id) {
+          await m.pend(applicantData.id);
+        }
+      }
+
       const result = await getApplicantStatus(m.applicantId);
       if (result === 'verified') { await m.verify(); }
       if (result === 'rejected') { await m.reject(); }

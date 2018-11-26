@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       values: Status.enumValues.map(s => s.name),
       defaultValue: Status.init.name,
     },
-    isAgreeDelegation: { type: DataTypes.BOOLEAN, defaultValue: false },
+    isAgreeDelegation: { type: DataTypes.BOOLEAN, defaultValue: true },
     activatedAt: { type: DataTypes.INTEGER },
     deactivatedAt: { type: DataTypes.INTEGER },
   }, {
