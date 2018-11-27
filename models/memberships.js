@@ -76,6 +76,13 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // instance methods
+  Membership.prototype.init = async function init(applicantId) {
+    if (this.status === Status.init.name && applicantId) {
+      await this.update({ applicantId });
+      await MembershipLog.register(Object.assign({ membershipId: this.id }, this.toJSON()));
+    }
+  };
+
   Membership.prototype.pend = async function pend(applicantId) {
     if (this.status === Status.init.name) {
       if (applicantId) {

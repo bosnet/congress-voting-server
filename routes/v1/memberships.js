@@ -183,8 +183,13 @@ router.put('/memberships/:address', async (req, res, next) => {
     }
 
     const m = await Membership.findByAddress(req.params.address);
+    const result = await getApplicantStatus(applicantId);
     if (m.status === Membership.Status.init.name) {
-      m.pend(applicantId);
+      if (result === 'init') {
+        m.init(applicantId);
+      } else {
+        m.pend(applicantId);
+      }
     } else if (m.status === Membership.Status.rejected.name && applicantId === 'ApplicantResubmitted') {
       m.pend();
     }
