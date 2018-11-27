@@ -68,6 +68,7 @@ router.get('/proposals/ongoing', async (req, res, next) => {
 // proposal detail
 router.get('/proposals/:id', async (req, res, next) => {
   try {
+    debug('GET /proposals/:id %s', req.params.id);
     const pr = await Proposal.findById(req.params.id);
     if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
 
@@ -82,6 +83,7 @@ router.get('/proposals/:id', async (req, res, next) => {
 // check vote to the proposal
 router.get('/proposals/:id/votes/:address', async (req, res, next) => {
   try {
+    debug('GET /proposals/:id/votes/:address %s %s', req.params.id, req.params.address);
     const pr = await Proposal.findById(req.params.id);
     if (!pr) { return next(createError(404, 'The proposal id does not exist.')); }
 
@@ -98,6 +100,7 @@ router.get('/proposals/:id/votes/:address', async (req, res, next) => {
 // vote to a proposal(with signature)
 router.post('/proposals/:id/vote', async (req, res, next) => {
   try {
+    debug('POST /proposals/:id/vote %s %o', req.params.id, req.body);
     const [publicAddress, proposalId, answer] = req.body.data;
     if (parseInt(req.params.id, 10) !== proposalId) {
       return next(createError(400, 'The proposal id does not match.'));
