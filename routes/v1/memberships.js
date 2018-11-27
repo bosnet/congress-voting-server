@@ -92,7 +92,11 @@ router.post('/memberships/sumsub/callback', async (req, res, next) => {
         const m = await Membership.findByAddress(applicantData.externalUserId);
         if (!m) { return res.json({}); }
         if (!m.applicantId) {
-          await m.pend(req.body.applicantId);
+          if (applicantData.review.reviewStatus === 'init') {
+            await m.init(req.body.applicantId);
+          } else if (applicantData.review.reviewStatus === 'pending') {
+            await m.pend(req.body.applicantId);
+          }
         }
       }
     }
