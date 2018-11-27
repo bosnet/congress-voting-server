@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
     sebak: process.env.SEBAK_URL,
     'sebak-network-id': process.env.SEBAK_NETWORKID,
     'sumnsub-url': process.env.SUMSUB_HOST,
-    'sumnsub-renew-interbal': process.env.SUMSUB_RENEW_INTERVAL,
+    'sumnsub-renew-interval': process.env.SUMSUB_RENEW_INTERVAL,
     'congress-voting-account': process.env.CONGRESS_VOTING_ACCOUNT,
   });
 });
