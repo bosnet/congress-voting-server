@@ -187,6 +187,11 @@ router.put('/memberships/:address', async (req, res, next) => {
     }
 
     const m = await Membership.findByAddress(req.params.address);
+    if (m.status === Membership.Status.rejected.name && applicantId === 'ApplicantResubmitted') {
+      m.pend();
+      return res.json(underscored(m.toJSON()));
+    }
+
     const result = await getApplicantStatus(applicantId);
     if (m.status === Membership.Status.init.name) {
       if (result === 'init') {
