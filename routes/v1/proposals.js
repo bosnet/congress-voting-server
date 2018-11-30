@@ -1,6 +1,7 @@
 const express = require('express');
 const createError = require('http-errors');
 const { hash, verify } = require('sebakjs-util');
+const debug = require('debug')('voting:routes:proposals');
 
 const { Proposal, Vote } = require('../../models/index');
 const { underscored } = require('../utils');
