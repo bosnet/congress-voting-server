@@ -3,6 +3,7 @@
 const camelcase = require('camelcase');
 const taskFns = require('../lib/tasks');
 const { currentHeight } = require('../lib/sebak');
+const { sequelize } = require('../models/index');
 
 const tasks = {};
 const extra = {};
@@ -31,6 +32,9 @@ async function taskMain(options) {
   const sensitive = (k, v) => (k.indexOf('secret') === -1 && k.indexOf('pass') === -1 ? v : '****');
   console.log(Object.keys(options)
     .map(k => `${k.padStart(20, ' ')} = ${sensitive(k.toLowerCase(), options[k])}`).join('\n'));
+  console.log(`${'dbname'.padStart(20, ' ')} = ${sequelize.config.database}`);
+  console.log(`${'dbhost'.padStart(20, ' ')} = ${sequelize.config.host}`);
+  console.log(`${'dbuser'.padStart(20, ' ')} = ${sequelize.config.username}`);
 
   const results = [];
   for (let i = 0; i < argv.length; i += 1) {

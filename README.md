@@ -65,3 +65,9 @@ $ SEBAK_PROPOSER_SECRET=<YOUR_SECRET> \
   SEBAK_VOTING_RESULT_STORAGES=<VOTING_RESULT_STORAGES> \
   npm run task confirm-voting-result
 ```
+
+To extract congress member list for PF00:
+
+```sh
+$ SEBAK_START_DATE="" npm run task aggregate-pf00-candidates
+```
