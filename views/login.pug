@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  h1 로그인 #{isLogin}
+  form(method="POST" action="/login")
+    input(type="hidden" name="source" value=`${source}`)
+    input(type="text" name="address" value="GC4GSF6IVO2POME4JATAA2AO6APC4BFCXWWDCMEKSDQTT4LGV27Y5TNS")
+    input(type="submit")

@@ -2,3 +2,4 @@ node_modules/
 .idea/
 .envrc
 .python-version
+newrelic_agent.log
