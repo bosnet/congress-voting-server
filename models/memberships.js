@@ -99,14 +99,18 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   Membership.prototype.verify = async function verify() {
-    if (this.status === Status.init.name || this.status === Status.pending.name || this.status === Status.rejected.name) {
+    if (this.status === Status.init.name
+      || this.status === Status.pending.name
+      || this.status === Status.rejected.name) {
       await this.update({ status: Status.verified.name });
       await MembershipLog.register(Object.assign({ membershipId: this.id }, this.toJSON()));
     }
   };
 
   Membership.prototype.reject = async function reject() {
-    if (this.status === Status.init.name || this.status === Status.pending.name || this.status === Status.verified.name) {
+    if (this.status === Status.init.name
+      || this.status === Status.pending.name
+      || this.status === Status.verified.name) {
       await this.update({ status: Status.rejected.name });
       await MembershipLog.register(Object.assign({ membershipId: this.id }, this.toJSON()));
     }

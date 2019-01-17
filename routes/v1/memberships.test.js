@@ -1,7 +1,6 @@
 const request = require('supertest');
 const cryptoRandomString = require('crypto-random-string');
 const { expect } = require('chai');
-const nock = require('nock');
 const { generate, hash, sign } = require('sebakjs-util');
 
 const app = require('../../app');
@@ -198,25 +197,21 @@ describe('Membership /v1 API', () => {
 
 
   describe('GET /memberships/:address', () => {
+    let keypair;
+    let applicantId;
     let m;
-    const keypair = generate();
 
-    before(async () => {
-      const rlp = [keypair.address, cryptoRandomString(24)];
-      const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
-
-      const res = await request(app)
-        .post(`${urlPrefix}/memberships`)
-        .send({
-          data: rlp,
-          signature: sig,
-        })
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      m = res.body;
+    beforeEach(async () => {
+      keypair = generate();
+      applicantId = cryptoRandomString(24);
+      m = await Membership.register({
+        publicAddress: keypair.address,
+        applicantId,
+        status: Membership.Status.init.name,
+      });
     });
+
+    afterEach(mock.cleanAll);
 
     it('should return an existing membership', async () => request(app)
       .get(`${urlPrefix}/memberships/${keypair.address}`)
@@ -230,10 +225,8 @@ describe('Membership /v1 API', () => {
       const interval = process.env.SUMSUB_RENEW_INTERVAL;
       process.env.SUMSUB_RENEW_INTERVAL = 10;
 
-      nock('https://test-api.sumsub.com:443')
-        .filteringPath(/resources\/applicants.*/g, 'mocked')
-        .get('/mocked')
-        .reply(200, { status: { reviewStatus: 'pending' } });
+      mock.sumsub.applicantByExternalId(applicantId, keypair.address);
+      mock.sumsub.applicantStatus(cryptoRandomString(24), cryptoRandomString(24), applicantId);
 
       setTimeout(() => {
         let err;
@@ -244,10 +237,9 @@ describe('Membership /v1 API', () => {
           .then((res) => {
             try {
               expect(res.body).to.have.property('public_address').to.equal(keypair.address);
-              expect(res.body).to.have.property('updated_at').to.not.equal(m.updated_at);
+              expect(res.body).to.have.property('updated_at').to.not.equal(m.updatedAt.toISOString());
             } catch (e) { err = e; }
 
-            nock.cleanAll();
             process.env.SUMSUB_RENEW_INTERVAL = interval;
             done(err);
           });
@@ -257,17 +249,23 @@ describe('Membership /v1 API', () => {
 
   describe('PUT /memberships/:address', () => {
     let keypair;
+    let applicantId;
 
     beforeEach(async () => {
       keypair = generate();
+      applicantId = cryptoRandomString(24);
       await Membership.register({
         publicAddress: keypair.address,
+        applicantId,
         status: Membership.Status.init.name,
       });
+
+      mock.sumsub.applicantStatus(cryptoRandomString(24), cryptoRandomString(24), applicantId);
     });
 
+    afterEach(mock.cleanAll);
+
     it('should update applicant id with pending status', async () => {
-      const applicantId = cryptoRandomString(24);
       const rlp = [keypair.address, applicantId];
       const sig = sign(hash(rlp), process.env.SEBAK_NETWORKID, keypair.seed);
 

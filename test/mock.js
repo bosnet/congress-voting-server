@@ -201,6 +201,14 @@ const sebakGetAccountOperations = (address, params = '', expectedOps) => {
             source: 'GCT67AX6PSARM47MJYAEMAQTS4LQRJDJFSMBAEEKHVCDIP5VRC3P2RPC',
             tx_hash: o.tx_hash,
             type: 'congress-voting',
+            _links: {
+              self: {
+                href: `/api/v1/transactions/${o.tx_hash}/operations/0`,
+              },
+              transaction: {
+                href: `/api/v1/transactions/${o.tx_hash}`,
+              },
+            },
           })),
         },
         _links: {

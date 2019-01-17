@@ -36,15 +36,15 @@ describe('Membership Model', () => {
     expect(m.status).to.equal(Membership.Status.verified.name);
   });
 
-  it('should verify a existing membership only pending or rejected', async () => {
+  it('should verify a existing membership only init, pending or rejected', async () => {
     const u = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      status: Membership.Status.init.name,
+      status: Membership.Status.active.name,
     });
 
     await u.verify();
 
-    expect(u.status).to.equal(Membership.Status.init.name);
+    expect(u.status).to.equal(Membership.Status.active.name);
   });
 
   it('should reject a existing membership', async () => {
@@ -54,15 +54,15 @@ describe('Membership Model', () => {
     expect(m.status).to.equal(Membership.Status.rejected.name);
   });
 
-  it('should reject a existing membership only pending or verified', async () => {
+  it('should reject a existing membership only init, pending or verified', async () => {
     const u = await Membership.register({
       publicAddress: cryptoRandomString(56),
-      status: Membership.Status.init.name,
+      status: Membership.Status.active.name,
     });
 
     await u.reject();
 
-    expect(u.status).to.equal(Membership.Status.init.name);
+    expect(u.status).to.equal(Membership.Status.active.name);
   });
 
   it('should activate a existing membership', async () => {

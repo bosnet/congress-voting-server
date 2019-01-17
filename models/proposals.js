@@ -84,7 +84,7 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // instance methods
-  Proposal.prototype.report = async function report(result) {
+  Proposal.prototype.report = async function report(result = {}) {
     return this.update({
       reported: true,
       resultMembershipHash: result.membershipHash,
