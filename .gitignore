@@ -3,3 +3,5 @@ node_modules/
 .envrc
 .python-version
 newrelic_agent.log
+/public/dist
+/.cache/

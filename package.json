@@ -8,8 +8,12 @@
     "task": "node ./bin/task",
     "test": "mocha --exit --recursive -t 20000 $(find . -name '*.test.js' -not -path './node_modules/*')",
     "lint": "eslint .",
-    "dev": "nodemon npm start | pino-pretty",
-    "migrate": "sequelize db:migrate"
+    "dev": "concurrently 'npm run front:watch' 'nodemon npm start | pino-pretty'",
+    "migrate": "sequelize db:migrate",
+    "prefront:build": "rimraf public/dist",
+    "front:build": "MODE=build parcel build --out-dir public/dist --public-url /dist/ views/login.pug",
+    "prefront:watch": "rimraf public/dist",
+    "front:watch": "MODE=build parcel watch --out-dir public/dist --public-url /dist/ views/login.pug"
   },
   "repository": {
     "type": "git",
@@ -34,6 +38,7 @@
     "express-session": "^1.15.6",
     "got": "^9.6.0",
     "http-errors": "~1.7.1",
+    "jquery": "^3.3.1",
     "js-yaml": "^3.12.1",
     "moment": "^2.23.0",
     "morgan": "~1.9.0",
@@ -42,6 +47,7 @@
     "pg-hstore": "^2.3.2",
     "pino": "^5.10.7",
     "pug": "^2.0.3",
+    "random-word": "^2.0.0",
     "rlp": "^2.2.2",
     "sebakjs-util": "^0.1.1",
     "sequelize": "^4.42.0",
@@ -49,6 +55,7 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "concurrently": "^4.1.0",
     "crypto-random-string": "^1.0.0",
     "eslint": "^5.12.0",
     "eslint-config-airbnb-base": "^13.1.0",
@@ -57,7 +64,9 @@
     "mocha": "^5.2.0",
     "nock": "^10.0.6",
     "nodemon": "^1.18.9",
+    "parcel-bundler": "^1.11.0",
     "pino-pretty": "^2.5.0",
+    "rimraf": "^2.6.3",
     "sequelize-cli": "^5.4.0",
     "supertest": "^3.4.1"
   }

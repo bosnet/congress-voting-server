@@ -1,22 +1,43 @@
 const express = require('express');
 const crypto = require('crypto');
 const createError = require('http-errors');
+const path = require('path');
+const { readdirSync } = require('fs');
+const randomWord = require('random-word');
+const { verify } = require('sebakjs-util');
 
 const { Membership } = require('../../models/index');
 
 const router = express.Router();
 
+const SIGN_NONCE = 'boscoin';
 const VANILLA_CLIENT_ID = process.env.VANILLA_CLIENT_ID || '';
 const VANILLA_SECRET = process.env.VANILLA_SECRET || '';
+const VANILLA_FORUM_URL = 'https://boscoin.vanillacommunity.com/sso?Target=/categories';
 
 const sha256 = str => crypto.createHash('sha256').update(str, 'utf8').digest('hex');
 
+const distDir = path.join(__dirname, '..', '..', 'public', 'dist');
+
+const compiledStaticFiles = readdirSync(distDir);
+const staticFiles = {};
+compiledStaticFiles
+  .filter(f => f.lastIndexOf('.js') === f.length - 3 || f.lastIndexOf('.css') === f.length - 4)
+  .forEach((f) => { staticFiles[f.replace(/\..*?\./, '.')] = f; });
+
 router.get('/login', (req, res) => {
-  // TODO: redirect to forum if user already logged-in
-  res.render('login', {
+  if (req.session.address) {
+    return res.redirect(VANILLA_FORUM_URL);
+  }
+  const loginCode = [1, 2, 3, 4].map(() => randomWord()).join('-');
+
+  req.session.loginCode = loginCode;
+  return res.render('login', {
     title: 'login',
-    isLogin: !!req.session.address,
     source: req.query.source || '',
+    staticFiles,
+    loginCode,
+    nonce: SIGN_NONCE,
   });
 });
 
@@ -24,14 +45,23 @@ router.post('/login', async (req, res, next) => {
   try {
     const m = await Membership.findByAddress(req.body.address);
     if (!m) { return next(createError(404, 'The address does not exist.')); }
+    // TODO: check if congress member
+
+    const isValidSignature = verify(
+      req.session.loginCode,
+      SIGN_NONCE,
+      req.body.signature,
+      req.body.address,
+    );
+    if (!isValidSignature) { return next(createError(400, 'Wrong signature')); }
 
     req.session.address = req.body.address;
     if (req.body.source === 'congress_forum') {
-      return res.redirect('https://boscoin.vanillacommunity.com/sso?Target=/categories');
+      return res.redirect(VANILLA_FORUM_URL);
     }
 
     // currently redirect to congress forum because it is only service to use login
-    return res.redirect('https://boscoin.vanillacommunity.com/sso?Target=/categories');
+    return res.redirect(VANILLA_FORUM_URL);
   } catch (err) {
     return next(err);
   }

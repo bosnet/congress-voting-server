@@ -3,6 +3,7 @@ html(lang="en")
   head
     meta(charset="utf-8")
     title= title
-    link(rel="stylesheet" href="/css/main.css")
+    link(rel="stylesheet" href=`${process.env.MODE === 'build' ? '../public/css/main.css' : /dist/ + staticFiles['main.css']}`)
   body
     block content
+    block scripts

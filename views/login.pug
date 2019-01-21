@@ -1,8 +1,16 @@
 extends layout
 
 block content
-  h1 로그인 #{isLogin}
-  form(method="POST" action="/login")
+  h1 로그인
+  input(type="text" name="key" value="")#key
+  input(type="hidden" name="code" value=`${loginCode}`)#code
+  input(type="hidden" name="nonce" value=`${nonce}`)#nonce
+  div#type
+
+  form(method="POST" action="/login")#login
     input(type="hidden" name="source" value=`${source}`)
     input(type="text" name="address" value="GC4GSF6IVO2POME4JATAA2AO6APC4BFCXWWDCMEKSDQTT4LGV27Y5TNS")
     input(type="submit")
+
+block scripts
+  script(src=`${process.env.MODE === 'build' ? '../public/js/login.js' : /dist/ + staticFiles['login.js']}`)
