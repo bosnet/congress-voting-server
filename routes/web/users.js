@@ -44,8 +44,9 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res, next) => {
   try {
     const m = await Membership.findByAddress(req.body.address);
-    if (!m) { return next(createError(404, 'The address does not exist.')); }
-    // TODO: check if congress member
+    if (!m || m.status !== Membership.Status.active.name) {
+      return next(createError(404, 'The address does not exist.'));
+    }
 
     const isValidSignature = verify(
       req.session.loginCode,
@@ -57,10 +58,16 @@ router.post('/login', async (req, res, next) => {
 
     req.session.address = req.body.address;
     if (req.body.source === 'congress_forum') {
+      if (req.xhr) {
+        return res.json({ redirect_to: VANILLA_FORUM_URL});
+      }
       return res.redirect(VANILLA_FORUM_URL);
     }
 
     // currently redirect to congress forum because it is only service to use login
+    if (req.xhr) {
+      return res.json({ redirect_to: VANILLA_FORUM_URL});
+    }
     return res.redirect(VANILLA_FORUM_URL);
   } catch (err) {
     return next(err);
