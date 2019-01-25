@@ -3,7 +3,9 @@ html(lang="en")
   head
     meta(charset="utf-8")
     title= title
-    link(rel="stylesheet" href=`${process.env.MODE === 'build' ? '../public/css/main.css' : /dist/ + staticFiles['main.css']}`)
+    meta(name="viewport" content="width=device-width")
+    link(href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Play:400,700" rel="stylesheet")
+    link(rel="stylesheet" href=`/dist/${staticFiles['login.css']}`)
   body
     block content
     block scripts

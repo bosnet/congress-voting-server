@@ -1,0 +1,5 @@
+@import '../../node_modules/floating-form-labels/scss/floating-form-labels.scss';
+
+.ffl-wrapper {
+  @include floating-form-labels(1.8rem, 1rem);
+}

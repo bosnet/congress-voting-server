@@ -1,16 +1,38 @@
 extends layout
 
 block content
-  h1 로그인
-  input(type="text" name="key" value="")#key
-  input(type="hidden" name="code" value=`${loginCode}`)#code
-  input(type="hidden" name="nonce" value=`${nonce}`)#nonce
-  div#type
-
-  form(method="POST" action="/login")#login
-    input(type="hidden" name="source" value=`${source}`)
-    input(type="text" name="address" value="GC4GSF6IVO2POME4JATAA2AO6APC4BFCXWWDCMEKSDQTT4LGV27Y5TNS")
-    input(type="submit")
+  a(href="https://boscoin.io")
+    img(src="/svg/logo.svg" alt="BOScoin" class="logo")
+  #login
+    h1 Are you ready to enjoy the forum?
+    h3 Membership Account verification will activate forum usage
+    section.form
+      .errors &amp;
+      fieldset.form-item.key
+        input(type="hidden" name="code" value=`${loginCode}`)#code
+        input(type="hidden" name="nonce" value=`${nonce}`)#nonce
+        .form-item-box.ffl-wrapper
+          label(for="seed-or-key").ffl-label Secret Seed or Recovery Key
+          input(type="text")#seed-or-key.input
+          button.clear
+            img(src="/svg/input-x.svg")
+          .error-msg &amp;
+      fieldset.form-item.password
+        .form-item-box.ffl-wrapper
+          label(for="seed-or-key").ffl-label Password
+          input(type="password")#password.input
+          button.visible
+            img(src="/svg/input-eye.svg")
+          .error-msg &amp;
+      form(action="/login" method="post")#login-form
+        input(type="hidden" name="source" value=`${source}`)#source
+        input(type="hidden" name="address")
+        input(type="submit" value="GO").btn
+    p.footer-msg Membership account on the Congress Voting Desktop application is the KYC-verified account
+    p.footer-msg
+      | Don’t have a Membership account yet?
+      |
+      a(href="https://boscoin.io/congress-voting/").link-register Click here to register
 
 block scripts
-  script(src=`${process.env.MODE === 'build' ? '../public/js/login.js' : /dist/ + staticFiles['login.js']}`)
+  script(src=`/dist/${staticFiles['login.js']}`)

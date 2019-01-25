@@ -1,0 +1,261 @@
+body {
+  background-color: #EAF0F7;
+  width: 100%;
+  font-size: 16px;
+  font-family: play, 'Open Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 100px;
+}
+
+#login {
+  text-align: center;
+  margin-top: 95px;
+  width: 100%;
+}
+
+#login h1 {
+  text-align: center;
+  margin: 0 0 19px 0;
+  padding: 0 9%;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #394878;
+}
+
+#login h3 {
+  color: #394878;
+  font-size: 1.3rem;
+  margin: 0 auto 35px;
+  font-weight: 400;
+}
+
+#login section.form {
+  background-color: #fff;
+  border: 1px solid #d4dee9;
+  margin: 0 auto;
+  width: 75%;
+  max-width: 820px;
+  padding-top: 30px;
+  padding-bottom: 66px;
+}
+
+#login section.form .errors {
+  margin: 0 auto 40px;
+  background-color: #ffe7e7;
+  border: 1px solid #ed6060;
+  text-align: left;
+  color: #ed6060;
+  width: 72%;
+  padding: 10px 15px;
+  visibility: hidden;
+}
+
+#login section.form .errors.show {
+  visibility: visible;
+}
+
+#login section.form fieldset {
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  width: 75%;
+  position: relative;
+}
+
+#login section.form .form-item .form-item-box {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+#login section.form .form-item.key {
+  display: block;
+}
+
+#login section.form .form-item.password {
+  display: none;
+}
+
+#login section.form .ffl-label {
+  font-size: 1.1rem;
+  color: #a2adba;
+  font-weight: 400;
+  left: 15px;
+}
+
+#login section.form .ffl-floated .ffl-label {
+  color: #99a4b0;
+  font-size: 1rem;
+  left: 0;
+}
+
+#login section.form .input{
+  display: inline-block;
+  border: none;
+  border-bottom: 1px solid #c6d1d5;
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 400;
+  width: 100%;
+  box-sizing: border-box;
+  color: #333333;
+  display: inline-block;
+  padding: 10px 50px 10px 15px;
+  outline: none;
+  /* 인풋 error시 밑에 border 빨개짐*/
+  /*border-bottom: 1px solid #ED6060;*/
+
+  /*아이폰에서 input 둥근 모서리 없애려고 넣었는데 안없어져요..ㅠㅠ */
+  /* appearance: none;
+  border-radius: 0;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+  -webkit-outline-style: none;
+  -moz-appearance: none;
+  -moz-border-radius: 0;
+  outline-style:none; */
+}
+
+#login section.form .input:focus{
+  border-color: #3c92e4;
+}
+
+#login section.form .clear {
+  cursor: pointer;
+  border: none;
+  margin-left: -36px;
+  visibility: hidden;
+}
+
+#login section.form .clear.show {
+  visibility: visible;
+}
+
+#login section.form .error-msg {
+  display: block;
+  margin: 4px auto;
+  color: #ED6060;
+  visibility: hidden;
+}
+
+#login section.form .form-item.error .error-msg {
+  visibility: visible;
+}
+
+#login-form {
+  margin-top: 75px;
+}
+
+#login .btn{
+  min-width: 300px;
+  padding: 19px 30px;
+  border: none;
+  background-color: #3c92e4;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 1px;
+  color: white;
+  cursor: pointer;
+}
+
+#login .btn:visited,
+#login .btn:hover,
+#login .btn:focus{
+  box-shadow: 0 5px 11px 0 #a2cbf2;
+  background-color: #2a85da;
+}
+
+#login .btn:active{
+  box-shadow: 0 5px 11px 0 #b5d9fb;
+  background-color: #1866b0;
+}
+
+.input-icon-eye:visited, .input-icon-eye:hover, .input-icon-eye:focus, .input-icon-eye:active{
+  /* 버튼 안에 있는 이미지의 컬러가 변경되고 싶어요.  */
+  fill: #646464
+}
+.link-register:link, .link-register:visited{
+  text-decoration: none;
+  color: #3c92e4;
+  font-weight: 700;
+}
+
+.footer-msg {
+  font-weight: 400;
+  text-align: left;
+  color: #808d9b;
+  max-width: 820px;
+  margin: 20px auto;
+  line-height: 20px;
+  width: 75%;
+}
+
+
+@media (max-width: 850px) {
+  #login {
+    margin-top: 55px;
+    width: 85%;
+  }
+
+  .logo{
+    width: 72px;
+  }
+
+  #login h1 {
+    width: 100%;
+    text-align: left;
+    font-size: 2.3rem;
+    line-height: 43px;
+    margin: 20px auto 10px auto;
+  }
+
+  #login h3 {
+    width: 100%;
+    max-width: 820px;
+    text-align: left;
+    font-size: 1.1rem;
+    margin: 10px auto 30px auto;
+    line-height: 25px;
+  }
+
+  #login section.form {
+    width: 100%;
+  }
+
+  #login section.form .errors {
+    margin: 30px auto 20px auto;
+    font-size: 0.9rem;
+  }
+
+  .input-error{
+    display: inline-block;
+    margin: 4px auto;
+    width: 100%;
+    font-size: 1rem;
+    text-align: left;
+    color: #ED6060;
+  }
+
+  .btn{
+    width: 250px;
+    height: 50px;
+    margin: 45px auto 2% auto;
+  }
+  .info-text{
+    font-size: 0.95rem;
+    line-height: 22px;
+    width: 100%;
+  }
+  .info-text a{
+    padding-bottom: 40px;
+  }
+}
+
