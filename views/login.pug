@@ -8,26 +8,31 @@ block content
     h3 Membership Account verification will activate forum usage
     section.form
       .errors &amp;
-      fieldset.form-item.key
-        input(type="hidden" name="code" value=`${loginCode}`)#code
-        input(type="hidden" name="nonce" value=`${nonce}`)#nonce
-        .form-item-box.ffl-wrapper
-          label(for="seed-or-key").ffl-label Secret Seed or Recovery Key
-          input(type="text")#seed-or-key.input
-          button.clear
-            img(src="/svg/input-x.svg")
-          .error-msg &amp;
-      fieldset.form-item.password
-        .form-item-box.ffl-wrapper
-          label(for="seed-or-key").ffl-label Password
-          input(type="password")#password.input
-          button.visible
-            img(src="/svg/input-eye.svg")
-          .error-msg &amp;
-      form(action="/login" method="post")#login-form
-        input(type="hidden" name="source" value=`${source}`)#source
-        input(type="hidden" name="address")
-        input(type="submit" value="GO").btn
+      .steps
+        .step1
+          fieldset.form-item.key
+            input(type="hidden" name="code" value=`${loginCode}`)#code
+            input(type="hidden" name="nonce" value=`${nonce}`)#nonce
+            input(type="hidden" name="source" value=`${source}`)#source
+            .form-item-box.ffl-wrapper
+              label(for="seed-or-key").ffl-label Secret Seed or Recovery Key
+              input(type="text")#seed-or-key.input
+              button.clear
+                img(src="/svg/input-x.svg")
+              .error-msg &amp;
+          form(action="/login" method="post")#login-form
+            input(type="submit" value="GO").btn
+        .step2
+          fieldset.form-item.password
+            .form-item-box.ffl-wrapper
+              label(for="password").ffl-label Password
+              input(type="password")#password.input
+              button.visible
+                img(src="/svg/input-eye.svg")
+              .error-msg &amp;
+          form(action="/login" method="post")#password-form
+            input(type="button" value="Back").back-btn
+            input(type="submit" value="GO").btn
     p.footer-msg Membership account on the Congress Voting Desktop application is the KYC-verified account
     p.footer-msg
       | Don’t have a Membership account yet?
