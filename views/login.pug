@@ -28,7 +28,8 @@ block content
               label(for="password").ffl-label Password
               input(type="password")#password.input
               button.visible
-                img(src="/svg/input-eye.svg")
+                img(src="/svg/input-eye.svg").off
+                img(src="/svg/input-eye-on.svg").on
               .error-msg &amp;
           form(action="/login" method="post")#password-form
             input(type="button" value="Back").back-btn

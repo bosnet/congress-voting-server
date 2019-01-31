@@ -13,34 +13,20 @@ const B58 = BaseX('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz');
 const iv = Buffer.from([0x42, 0x4F, 0x53, 0x5F, 0x43, 0x4F, 0x49, 0x4E,
   0x5F, 0x57, 0x41, 0x4C, 0x4C, 0x45, 0x54, 0x53]);
 
-var $clearBtn = $('.clear');
-var $seedOrKey = $('#seed-or-key');
-var $keyForm = $('#login .form-item.key');
-var $passwordForm = $('#login .form-item.password');
-var $passwordInput = $('#login #password');
-var $keyFormError = $('#login .form-item.key .error-msg');
-var $passwordFormError = $('#login .form-item.password .error-msg');
-var $step1 = $('#login .step1');
-var $step2 = $('#login .step2');
-var $errors = $('#login .errors');
+const $clearBtn = $('.clear');
+const $seedOrKey = $('#seed-or-key');
+const $keyForm = $('#login .form-item.key');
+const $passwordForm = $('#login .form-item.password');
+const $passwordInput = $('#login #password');
+const $keyFormError = $('#login .form-item.key .error-msg');
+const $passwordFormError = $('#login .form-item.password .error-msg');
+const $step1 = $('#login .step1');
+const $step2 = $('#login .step2');
+const $errors = $('#login .errors');
 
-$clearBtn.click(function clickClearBtn() {
+$clearBtn.click(() => {
   $seedOrKey.val('').focus();
 });
-
-let keyType = 'seed';
-
-function toggleKeyType(t) {
-  if (t === 'recovery') {
-    keyType = 'recovery';
-    $keyForm.hide();
-    $passwordForm.show();
-  } else {
-    keyType = 'seed';
-    $passwordForm.hide();
-    $keyForm.show();
-  }
-}
 
 function isRecoveryKey(key) {
   return key.indexOf('BOS') === 0;
@@ -54,13 +40,15 @@ function login(source, signature, address) {
   $.post('/login', { source, signature, address })
     .done((data) => {
       if (data && data.redirect_to) {
-        location.href = data.redirect_to;
+        window.location.href = data.redirect_to;
       }
+      return false;
     })
     .fail((xhr, textStatus, errorThrown) => {
       if (errorThrown === 'Not Found') {
         return showError('This is not a Membership Account');
       }
+      return;
     });
 }
 
@@ -91,7 +79,7 @@ $('#login-form').submit((event) => {
       const signature = sign(code, nonce, key);
       const source = $('#source').val();
       login(source, signature, address);
-    } catch(e) {
+    } catch (e) {
       if (e.message === 'invalid encoded string') {
         $keyFormError.html('Secret Seed is invalid');
         $keyForm.addClass('error');
@@ -126,20 +114,16 @@ $('#password-form').submit((event) => {
   const code = $('#code').val();
   const nonce = $('#nonce').val();
 
-  const RECOVERY_KEY_PREFIX = 'BOS';
-  const RECOVERY_KEY_POSTFIX = 'D1';
-
   try {
     const data = recoveryKey.substring(3, recoveryKey.length - 2);
     const pwHash = createHash('sha256').update(pw).digest();
     const decipher = createDecipheriv('aes256', pwHash, iv);
     const decrypted = decipher.update(B58.decode(data), 'binary', 'utf8');
-    const seed =  decrypted + decipher.final('utf8');
+    const seed = decrypted + decipher.final('utf8');
 
     const source = $('#source').val();
     const address = getPublicAddress(seed);
     const signature = sign(code, nonce, seed);
-    console.log(address);
     login(source, signature, address);
   } catch(e) {
     if (e.message === 'unable to decrypt data') {
@@ -151,15 +135,19 @@ $('#password-form').submit((event) => {
   }
 });
 
-$('.visible').click((event) => {
+$('.visible').click(function () {
   if ($passwordInput.attr('type') === 'password') {
     $passwordInput.attr('type', 'text');
+    $(this).find('.off').hide();
+    $(this).find('.on').show();
   } else {
     $passwordInput.attr('type', 'password');
+    $(this).find('.on').hide();
+    $(this).find('.off').show();
   }
 });
 
-$('#login .back-btn').click((event) => {
+$('#login .back-btn').click(() => {
   $step1.addClass('show');
   $step1.removeClass('hide');
   $step2.addClass('hide');

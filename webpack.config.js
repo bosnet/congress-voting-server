@@ -1,5 +1,5 @@
 const path = require('path');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'production',
@@ -8,11 +8,11 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'public', 'dist'),
-    filename: "[name].[chunkhash].js",
+    filename: '[name].[chunkhash].js',
   },
   resolve: {
     alias: {
-      jquery: "jquery/src/jquery",
+      jquery: 'jquery/src/jquery',
     },
   },
   module: {
@@ -20,26 +20,26 @@ module.exports = {
       {
         test: /\.scss$/,
         use: [
-          { loader: MiniCssExtractPlugin.loader, },
-          "css-loader",
+          { loader: MiniCssExtractPlugin.loader },
+          'css-loader',
           'postcss-loader',
-          "sass-loader"
-        ]
+          'sass-loader',
+        ],
       },
       {
         test: /\.css$/,
         use: [
-          { loader: MiniCssExtractPlugin.loader, },
+          { loader: MiniCssExtractPlugin.loader },
           'css-loader',
-          'postcss-loader'
+          'postcss-loader',
         ],
       },
     ],
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "[name].[chunkhash].css",
-      chunkFilename: "[id].css"
-    })
+      filename: '[name].[chunkhash].css',
+      chunkFilename: '[id].css',
+    }),
   ],
 };

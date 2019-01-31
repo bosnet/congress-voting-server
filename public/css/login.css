@@ -7,6 +7,11 @@ body {
   padding: 0;
 }
 
+input {
+  appearance: none;
+  border-radius: 0;
+}
+
 .logo {
   position: absolute;
   top: 20px;
@@ -16,14 +21,13 @@ body {
 
 #login {
   text-align: center;
-  margin-top: 95px;
+  margin: 95px auto 30px;
   width: 100%;
 }
 
 #login h1 {
   text-align: center;
   margin: 0 0 19px 0;
-  padding: 0 9%;
   font-size: 2.8rem;
   font-weight: 700;
   color: #394878;
@@ -107,31 +111,6 @@ body {
   text-align: left;
 }
 
-/*#login section.form .form-item.key {*/
-  /*display: block;*/
-/*}*/
-
-/*#login section.form .form-item.key.hide {*/
-  /*animation: slide-fade-out-left .5s linear 0s forwards;*/
-/*}*/
-
-/*#login section.form .form-item.key.show {*/
-  /*animation: slide-fade-in-left .5s linear 10s forwards;*/
-/*}*/
-
-/*#login section.form .form-item.password {*/
-  /*display: none;*/
-  /*!*height: 0;*!*/
-/*}*/
-
-/*#login section.form .form-item.password.hide {*/
-  /*animation: slide-fade-out-right .7s forwards;*/
-/*}*/
-
-/*#login section.form .form-item.password.show {*/
-  /*animation: slide-fade-in-right .5s linear .5s forwards;*/
-/*}*/
-
 #login section.form .ffl-label {
   font-size: 1.1rem;
   color: #a2adba;
@@ -145,7 +124,7 @@ body {
   left: 0;
 }
 
-#login section.form .input{
+#login section.form .input {
   display: inline-block;
   border: none;
   border-bottom: 1px solid #c6d1d5;
@@ -158,28 +137,21 @@ body {
   display: inline-block;
   padding: 10px 50px 10px 15px;
   outline: none;
-  /* 인풋 error시 밑에 border 빨개짐*/
-  /*border-bottom: 1px solid #ED6060;*/
-
-  /*아이폰에서 input 둥근 모서리 없애려고 넣었는데 안없어져요..ㅠㅠ */
-  /* appearance: none;
-  border-radius: 0;
-  -webkit-appearance: none;
-  -webkit-border-radius: 0;
-  -webkit-outline-style: none;
-  -moz-appearance: none;
-  -moz-border-radius: 0;
-  outline-style:none; */
 }
 
-#login section.form .input:focus{
+#login section.form .form-item.error .input {
+  border-bottom: 1px solid #ED6060;
+}
+
+#login section.form .input:focus {
   border-color: #3c92e4;
 }
 
 #login section.form .clear {
   cursor: pointer;
   border: none;
-  margin-left: -36px;
+  margin-left: -25px;
+  padding: 0;
   visibility: hidden;
 }
 
@@ -190,7 +162,12 @@ body {
 #login section.form .visible {
   cursor: pointer;
   border: none;
-  margin-left: -36px;
+  margin-left: -29px;
+  padding: 0;
+}
+
+#login section.form .visible .on {
+  display: none;
 }
 
 #login section.form .error-msg {
@@ -241,7 +218,7 @@ body {
   min-width: unset;
 }
 
-#login .back-btn{
+#login .back-btn {
   border: 1px solid #A5A5A5;
   border-radius: 2px;
   cursor: pointer;
@@ -251,7 +228,7 @@ body {
   color: #A5A5A5;
   width: 220px;
   height: 60px;
-  margin: 45px 10px 2% 0;
+  margin: 0 10px 0 0;
 }
 
 #login .back-btn:visited,
@@ -261,11 +238,8 @@ body {
   box-shadow: 0 5px 11px 0 #d6e0ea;
 }
 
-.input-icon-eye:visited, .input-icon-eye:hover, .input-icon-eye:focus, .input-icon-eye:active{
-  /* 버튼 안에 있는 이미지의 컬러가 변경되고 싶어요.  */
-  fill: #646464
-}
-.link-register:link, .link-register:visited{
+.link-register:link,
+.link-register:visited {
   text-decoration: none;
   color: #3c92e4;
   font-weight: 700;
@@ -281,14 +255,13 @@ body {
   width: 75%;
 }
 
-
 @media (max-width: 850px) {
   #login {
     margin-top: 55px;
     width: 85%;
   }
 
-  .logo{
+  .logo {
     width: 72px;
   }
 
@@ -311,6 +284,13 @@ body {
 
   #login section.form {
     width: 100%;
+    padding-top: 0;
+    padding-bottom: 20px;
+  }
+
+  #login section.form .input {
+    padding-left: 10px;
+    outline: none;
   }
 
   #login section.form .errors {
@@ -318,27 +298,33 @@ body {
     font-size: 0.9rem;
   }
 
-  .input-error{
-    display: inline-block;
-    margin: 4px auto;
-    width: 100%;
-    font-size: 1rem;
-    text-align: left;
-    color: #ED6060;
+  #login .btn {
+    min-width: 250px;
+    margin: 0 auto 2% auto;
+    padding: 14px 30px;
   }
 
-  .btn{
-    width: 250px;
-    height: 50px;
-    margin: 45px auto 2% auto;
-  }
-  .info-text{
+  .footer-msg {
     font-size: 0.95rem;
     line-height: 22px;
     width: 100%;
   }
-  .info-text a{
-    padding-bottom: 40px;
+
+  #login-form,
+  #password-form {
+    margin-top: 45px;
+  }
+
+  #login .back-btn {
+    width: 138px;
+    height: 50px;
+    margin-right: 5px;
+  }
+
+  #login .step2 .btn {
+    width: 138px;
+    height: 50px;
+    margin-top: 0px;
   }
 }
 

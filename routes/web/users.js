@@ -59,14 +59,14 @@ router.post('/login', async (req, res, next) => {
     req.session.address = req.body.address;
     if (req.body.source === 'congress_forum') {
       if (req.xhr) {
-        return res.json({ redirect_to: VANILLA_FORUM_URL});
+        return res.json({ redirect_to: VANILLA_FORUM_URL });
       }
       return res.redirect(VANILLA_FORUM_URL);
     }
 
     // currently redirect to congress forum because it is only service to use login
     if (req.xhr) {
-      return res.json({ redirect_to: VANILLA_FORUM_URL});
+      return res.json({ redirect_to: VANILLA_FORUM_URL });
     }
     return res.redirect(VANILLA_FORUM_URL);
   } catch (err) {
