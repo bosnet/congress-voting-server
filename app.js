@@ -6,7 +6,9 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const Sentry = require('@sentry/node');
 const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
+const { sequelize  } = require('./models');
 const logger = require('./lib/logger');
 
 const app = express();
@@ -27,22 +29,32 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // session
+const EXPIRATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 const sessionOption = {
   saveUninitialized: false,
   resave: false,
   name: 'boscoin.sid',
-  secret: 'XxhA2.xapH#v7v8DX^sbpa&8',
+  secret: process.env.COOKIE_SECRET,
   httpOnly: true,
-  cookie: {},
+  cookie: { maxAge: EXPIRATION }
 };
+
+function extendDefaultFields(defaults, session) {
+  return {
+    data: defaults.data,
+    expires: defaults.expires,
+    address: session.address,
+  };
+}
 
 if (app.get('env') === 'production') {
   app.set('trust proxy', 1);
-  // TODO: use postgreSQL
-  // sessionOption.store = new RedisStore({
-  //   host: process.env.SESSION_STORE_HOST,
-  //   port: process.env.SESSION_STORE_PORT,
-  // });
+  sessionOption.store = new SequelizeStore({
+    db: sequelize,
+    table: 'Session',
+    expiration: EXPIRATION,
+    extendDefaultFields,
+  });
   sessionOption.cookie.secure = true;
 }
 
