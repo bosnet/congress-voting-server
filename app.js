@@ -8,7 +8,7 @@ const Sentry = require('@sentry/node');
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
-const { sequelize  } = require('./models');
+const { sequelize } = require('./models');
 const logger = require('./lib/logger');
 
 const app = express();
@@ -36,14 +36,14 @@ const sessionOption = {
   name: 'boscoin.sid',
   secret: process.env.COOKIE_SECRET,
   httpOnly: true,
-  cookie: { maxAge: EXPIRATION }
+  cookie: { maxAge: EXPIRATION },
 };
 
-function extendDefaultFields(defaults, session) {
+function extendDefaultFields(defaults, sess) {
   return {
     data: defaults.data,
     expires: defaults.expires,
-    address: session.address,
+    address: sess.address,
   };
 }
 

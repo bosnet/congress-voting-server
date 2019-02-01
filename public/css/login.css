@@ -105,6 +105,11 @@ input {
   position: relative;
 }
 
+#login section.form fieldset.key,
+#login section.form fieldset.password {
+  margin-bottom: 75px;
+}
+
 #login section.form .form-item .form-item-box {
   display: block;
   width: 100%;
@@ -179,11 +184,6 @@ input {
 
 #login section.form .form-item.error .error-msg {
   visibility: visible;
-}
-
-#login-form,
-#password-form {
-  margin-top: 75px;
 }
 
 #login .btn{

@@ -42,17 +42,16 @@ function login(source, signature, address) {
       if (data && data.redirect_to) {
         window.location.href = data.redirect_to;
       }
-      return false;
     })
     .fail((xhr, textStatus, errorThrown) => {
       if (errorThrown === 'Not Found') {
         return showError('This is not a Membership Account');
       }
-      return;
+      throw errorThrown;
     });
 }
 
-$seedOrKey.keyup(function () {
+$seedOrKey.keydown(() => {
   $keyForm.removeClass('error');
 
   const input = $(this).val();
@@ -78,24 +77,25 @@ $('#login-form').submit((event) => {
       const address = getPublicAddress(key);
       const signature = sign(code, nonce, key);
       const source = $('#source').val();
-      login(source, signature, address);
+      return login(source, signature, address);
     } catch (e) {
       if (e.message === 'invalid encoded string') {
         $keyFormError.html('Secret Seed is invalid');
         $keyForm.addClass('error');
-      } else {
-        throw e;
       }
+      throw e;
     }
   } else if (isRecoveryKey(key)) {
     $step1.addClass('hide');
     $step1.removeClass('show');
     $step2.addClass('show');
     $step2.removeClass('hide');
+    return true;
   }
+  return false;
 });
 
-$passwordInput.keyup(function () {
+$passwordInput.keydown(() => {
   $passwordForm.removeClass('error');
 });
 
@@ -124,18 +124,17 @@ $('#password-form').submit((event) => {
     const source = $('#source').val();
     const address = getPublicAddress(seed);
     const signature = sign(code, nonce, seed);
-    login(source, signature, address);
-  } catch(e) {
+    return login(source, signature, address);
+  } catch (e) {
     if (e.message === 'unable to decrypt data') {
       $passwordFormError.html('Please check Recovery key or password again');
       $passwordForm.addClass('error');
-    } else {
-      throw e;
     }
+    throw e;
   }
 });
 
-$('.visible').click(function () {
+$('.visible').click(function visibleClick() {
   if ($passwordInput.attr('type') === 'password') {
     $passwordInput.attr('type', 'text');
     $(this).find('.off').hide();

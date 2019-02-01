@@ -11,9 +11,7 @@ const { Membership } = require('../../models/index');
 const router = express.Router();
 
 const SIGN_NONCE = 'boscoin';
-const VANILLA_CLIENT_ID = process.env.VANILLA_CLIENT_ID || '';
-const VANILLA_SECRET = process.env.VANILLA_SECRET || '';
-const VANILLA_FORUM_URL = process.env.VANILLA_FORUM_URL;
+const { VANILLA_CLIENT_ID = '', VANILLA_SECRET = '', VANILLA_FORUM_URL } = process.env;
 
 const sha256 = str => crypto.createHash('sha256').update(str, 'utf8').digest('hex');
 
