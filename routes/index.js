@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/info', (req, res) => {
   res.json({
     sebak: process.env.SEBAK_URL,
     'sebak-network-id': process.env.SEBAK_NETWORKID,
