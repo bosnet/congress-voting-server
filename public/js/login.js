@@ -45,7 +45,7 @@ function login(source, signature, address) {
     })
     .fail((xhr, textStatus, errorThrown) => {
       if (errorThrown === 'Not Found') {
-        return showError('This is not a Membership Account');
+        return showError(MESSAGES.NOT_MEMBERSHIP);
       }
       throw errorThrown;
     });
@@ -66,7 +66,7 @@ $('#login-form').submit((event) => {
   const key = $seedOrKey.val().trim();
 
   if (key.length < 1) {
-    $keyFormError.html('Enter Secret Seed or Recovery Key');
+    $keyFormError.html(MESSAGES.ENTER_SEED_OR_RECOVERY);
     $keyForm.addClass('error');
     return false;
   }
@@ -82,10 +82,9 @@ $('#login-form').submit((event) => {
       return login(source, signature, address);
     } catch (e) {
       if (e.message === 'invalid encoded string') {
-        $keyFormError.html('Secret Seed is invalid');
+        $keyFormError.html(MESSAGES.INVALID_SEED);
         $keyForm.addClass('error');
       }
-      throw e;
     }
   } else if (isRecoveryKey(key)) {
     $step1.addClass('hide');
@@ -108,7 +107,7 @@ $('#password-form').submit((event) => {
   const pw = $passwordInput.val().trim();
 
   if (pw.length < 1) {
-    $passwordFormError.html('Enter your password');
+    $passwordFormError.html(MESSAGES.ENTER_PASSWORD);
     $passwordForm.addClass('error');
     return false;
   }
@@ -129,7 +128,7 @@ $('#password-form').submit((event) => {
     return login(source, signature, address);
   } catch (e) {
     if (e.message === 'unable to decrypt data') {
-      $passwordFormError.html('Please check Recovery key or password again');
+      $passwordFormError.html(MESSAGES.INVALID_RECOVERY);
       $passwordForm.addClass('error');
     }
     throw e;

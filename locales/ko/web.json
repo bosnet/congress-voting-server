@@ -1,0 +1,21 @@
+{
+  "login": {
+    "title": "포럼을 즐길 준비가 되었습니까?",
+    "title-sub": "멤버십 계좌 인증 후 포럼을 사용할 수 있습니다",
+    "key-placeholder": "보안키 또는 복구키",
+    "password-placeholder": "비밀번호",
+    "go-btn": "다음",
+    "back-btn": "뒤로",
+    "footer-msg1": "멤버십 계좌는 콩그레스 보팅 데스크탑 어플리케이션에서 KYC 인증을 한 계좌입니다",
+    "footer-msg2": "아직 멤버십 계좌가 없나요?",
+    "register-link": "멤버십 등록하러 가기",
+    "err-not-membership": "멤버쉽 계좌가 아닙니다",
+    "err-enter-seed-or-recovery": "보안키 또는 복구키를 입력하세요",
+    "err-invalid-seed": "보안키가 올바르지 않습니다",
+    "err-enter-password": "비밀번호를 입력하세요",
+    "err-invalid-recovery": "복구키 또는 비밀번호를 다시 확인해주세요"
+  },
+  "404": {
+
+  }
+}

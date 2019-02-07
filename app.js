@@ -1,4 +1,7 @@
 const express = require('express');
+const i18next = require("i18next");
+const i18nextMiddleware = require("i18next-express-middleware");
+const FilesystemBackend = require("i18next-node-fs-backend");
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -10,6 +13,19 @@ const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const { sequelize } = require('./models');
 const logger = require('./lib/logger');
 
+i18next
+  .use(i18nextMiddleware.LanguageDetector)
+  .use(FilesystemBackend)
+  .init({
+    fallbackLng: 'en',
+    preload: ['en', 'ko'],
+    backend: {
+      loadPath: 'locales/{{lng}}/{{ns}}.json'
+    },
+    ns: ['web'],
+    defaultNS: 'web',
+  });
+
 const app = express();
 
 app.set('view engine', 'pug');
@@ -19,6 +35,8 @@ if (process.env.SENTRY_DSN) {
   Sentry.init({ dsn: process.env.SENTRY_DSN });
   app.use(Sentry.Handlers.requestHandler());
 }
+
+app.use(i18nextMiddleware.handle(i18next, {}));
 
 app.use(morgan('dev'));
 app.use(cors());
@@ -108,5 +126,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     error: err.message,
   });
 });
+
+app.locals.t = i18next.t;
 
 module.exports = app;

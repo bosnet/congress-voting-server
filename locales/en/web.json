@@ -1,0 +1,21 @@
+{
+  "login": {
+    "title": "Are you ready to enjoy the forum?",
+    "title-sub": "Membership Account verification will activate forum usage",
+    "key-placeholder": "Secret Seed or Recovery Key",
+    "password-placeholder": "Password",
+    "go-btn": "Go",
+    "back-btn": "Back",
+    "footer-msg1": "Membership account on the Congress Voting Desktop application is the KYC-verified account",
+    "footer-msg2": "Don’t have a Membership account yet?",
+    "register-link": "Click here to register",
+    "err-not-membership": "This is not a Membership Account",
+    "err-enter-seed-or-recovery": "Enter Secret Seed or Recovery Key",
+    "err-invalid-seed": "Secret Seed is invalid",
+    "err-enter-password": "Enter your password",
+    "err-invalid-recovery": "Please check Recovery key or password again"
+  },
+  "404": {
+
+  }
+}
