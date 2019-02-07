@@ -10,7 +10,7 @@ block content
       .errors &amp;
       .steps
         .step1
-          form(action="/login" method="post")#login-form
+          form(action="/login" method="post" autocomplete="off")#login-form
             fieldset.form-item.key
               input(type="hidden" name="code" value=`${loginCode}`)#code
               input(type="hidden" name="nonce" value=`${nonce}`)#nonce
@@ -24,7 +24,7 @@ block content
             fieldset.btns
               input(type="submit" value=t('web:login.go-btn')).btn
         .step2
-          form(action="/login" method="post")#password-form
+          form(action="/login" method="post" autocomplete="off")#password-form
             fieldset.form-item.password
               .form-item-box.ffl-wrapper
                 label(for="password").ffl-label #{t('web:login.password-placeholder')}
