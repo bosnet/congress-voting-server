@@ -1,4 +1,3 @@
-const createError = require('http-errors');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -69,8 +68,17 @@ app.use('/api/v1', require('./routes/v1/proposals'));
 app.use('/', require('./routes/web/users'));
 
 // catch 404 and forward to error handler
-app.use((req, res, next) => {
-  next(createError(404));
+app.use((req, res) => {
+  res.format({
+    'text/html': () => {
+      res.render('404');
+    },
+    default: () => {
+      res.status(404).json({
+        error: 'Not Found',
+      });
+    },
+  });
 });
 
 
@@ -84,8 +92,19 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // TODO: error logging(sentry?)
   if (status >= 500) {
     logger.error(err);
+    return res.format({
+      'text/html': () => {
+        res.render('500');
+      },
+      default: () => {
+        res.status(status).json({
+          error: err.message,
+        });
+      },
+    });
   }
-  res.status(status).json({
+
+  return res.status(status).json({
     error: err.message,
   });
 });

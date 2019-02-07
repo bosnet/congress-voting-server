@@ -1,6 +1,140 @@
-extends layout
+doctype html
+html(lang="en")
+  head
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    link(href="https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700|Open+Sans:400,700" rel="stylesheet")
+    style.
+      body{
+        background-color: #EAF0F7;
+        width: 100%;
+        font-size: 16px;
+        font-family: play, 'Open Sans', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      #wrapper{
+        width: 85%;
+        display: block;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .error-text{
+        color: #394878;
+        font-size: 1.8rem;
+        font-weight: 700;
+        text-align: center;
+        word-break: keep-all;
+        word-wrap: break-word;
+        line-height: 150%;
+        margin: 0 auto;
+      }
+      .error-text~p{
+        color: #8b9ebc;
+        text-align: center;
+        margin: 0 auto;
+      }
+      .btn{
+        border-style:none;
+        -webkit-appearance: none;
+        border-radius: 2px;
+        border-color: #3c92e4;
+        background-color: #3c92e4;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 1px;
+        color: white;
+        cursor: pointer;
+      }
+      .btn{
+        border-style:none;
+        -webkit-appearance: none;
+        border-radius: 2px;
+        border-color: #3c92e4;
+        background-color: #3c92e4;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 1px;
+        color: white;
+      }
+      .btn:visited, .btn:hover, .btn:focus{
+        box-shadow: 0 5px 11px 0 #a2cbf2;
+        background-color: #2a85da;
+        color: white;
+      }
+      .btn:active{
+        box-shadow: 0 5px 11px 0 #b5d9fb;
+        background-color: #1866b0;
+        color: white;
+      }
 
-block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+      @media (min-width: 0px) and (max-width: 700px) {
+        .error-img{
+          width: 281px;
+          margin: 10% auto 9% auto;
+        }
+        .error-text{
+          font-size: 1.2rem;
+          padding: auto 20%;
+          width: 85%;
+        }
+        .error-text~p{
+          font-size: 1rem;
+          margin-top: 15px;
+        }
+        .btn{
+          width: 200px;
+          height: 45px;
+          font-size: 1rem;
+          margin-top: 18px;
+        }
+      }
+      @media (min-width: 701px) and (max-width: 1099px) {
+        .error-img{
+          width: 600px;
+          margin: 10% auto 4% auto;
+        }
+        .error-text {
+          font-size: 1.6rem;
+          width: 75%;
+          padding: auto 20%;
+        }
+        .error-text~p{
+          font-size: 1.3rem;
+          margin-top: 20px;
+        }
+        .btn{
+          width: 300px;
+          height: 60px;
+          font-size: 1.2rem;
+          margin-top: 23px;
+        }
+      }
+
+      @media (min-width: 1100px){
+        .error-img{
+          width: 600px;
+          margin: 10% auto 4% auto;
+        }
+        .error-text{
+          font-size: 1.8rem;
+          width: 82%;
+        }
+        .error-text~p{
+          font-size: 1.5rem;
+          margin-top: 20px;
+        }
+        .btn{
+          width: 300px;
+          height: 60px;
+          font-size: 1.2rem;
+          margin-top: 30px;
+        }
+      }
+  body
+    #wrapper
+      img(src="/svg/404.svg" alt="error-image").error-img
+      p.error-text Sorry, the page you were looking for doesn’t exist!
+      a(href="/")
+        input(type="button" value="Go Home").btn
