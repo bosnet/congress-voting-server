@@ -25,6 +25,6 @@ RUN apk --no-cache --virtual .gyp add \
     && npm install \
     && apk del .gyp
 
-COPY --from=build /opt/membership-server/public/dist /opt/membership-server
+COPY --from=build /opt/membership-server/public/dist /opt/membership-server/public/dist
 
 ENTRYPOINT ["npm", "run", "start"]
