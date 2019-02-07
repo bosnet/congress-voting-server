@@ -53,7 +53,9 @@ function login(source, signature, address) {
 
 $seedOrKey.keydown(() => {
   $keyForm.removeClass('error');
+});
 
+$seedOrKey.keyup(function () {
   const input = $(this).val();
   $clearBtn.toggleClass('show', input.length > 0);
 });
