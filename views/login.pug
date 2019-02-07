@@ -21,7 +21,7 @@ block content
                 span.clear
                   img(src="/svg/input-x.svg")
                 .error-msg &amp;
-            fieldset
+            fieldset.btns
               input(type="submit" value=t('web:login.go-btn')).btn
         .step2
           form(action="/login" method="post")#password-form
@@ -33,7 +33,7 @@ block content
                   img(src="/svg/input-eye.svg").off
                   img(src="/svg/input-eye-on.svg").on
                 .error-msg &amp;
-            fieldset
+            fieldset.btns
               input(type="button" value=t('web:login.back-btn')).back-btn
               input(type="submit" value=t('web:login.go-btn')).btn
     p.footer-msg #{t('web:login.footer-msg1')}

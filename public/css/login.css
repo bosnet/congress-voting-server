@@ -105,6 +105,10 @@ input {
   position: relative;
 }
 
+#login section.form fieldset.btns {
+  width: 100%;
+}
+
 #login section.form fieldset.key,
 #login section.form fieldset.password {
   margin-bottom: 75px;
@@ -225,6 +229,7 @@ input {
   font-size: 1.2rem;
   font-weight: 400;
   text-align: center;
+  background-color: #ffffff;
   color: #A5A5A5;
   width: 220px;
   height: 60px;
@@ -257,7 +262,7 @@ input {
 
 @media (max-width: 850px) {
   #login {
-    margin-top: 55px;
+    margin-top: 75px;
     width: 85%;
   }
 
@@ -298,6 +303,11 @@ input {
     font-size: 0.9rem;
   }
 
+  #login section.form fieldset.key,
+  #login section.form fieldset.password {
+    margin-bottom: 45px;
+  }
+
   #login .btn {
     min-width: 250px;
     margin: 0 auto 2% auto;
@@ -310,11 +320,6 @@ input {
     width: 100%;
   }
 
-  #login-form,
-  #password-form {
-    margin-top: 45px;
-  }
-
   #login .back-btn {
     width: 138px;
     height: 50px;
@@ -325,6 +330,7 @@ input {
     width: 138px;
     height: 50px;
     margin-top: 0px;
+    padding: 0;
   }
 }
 
