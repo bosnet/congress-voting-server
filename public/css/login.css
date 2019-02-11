@@ -260,6 +260,10 @@ input {
   width: 75%;
 }
 
+#login #password {
+  text-security:disc;
+}
+
 @media (max-width: 850px) {
   #login {
     margin-top: 75px;
