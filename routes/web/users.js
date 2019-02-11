@@ -11,7 +11,14 @@ const { Membership } = require('../../models/index');
 const router = express.Router();
 
 const SIGN_NONCE = 'boscoin';
-const { VANILLA_CLIENT_ID = '', VANILLA_SECRET = '', VANILLA_FORUM_URL } = process.env;
+const {
+  VANILLA_CLIENT_ID = '',
+  VANILLA_SECRET = '',
+  VANILLA_FORUM_URL = '',
+  VANILLA_ADMIN_EMAILS: ADMIN_EMAILS = '', // comma separated @boscoin.io emails
+  VANILLA_ADMIN_PASSWORD,
+} = process.env;
+const VANILLA_ADMIN_EMAILS = ADMIN_EMAILS.split(',');
 
 const sha256 = str => crypto.createHash('sha256').update(str, 'utf8').digest('hex');
 
@@ -41,20 +48,31 @@ router.get('/login', (req, res) => {
 
 router.post('/login', async (req, res, next) => {
   try {
-    const m = await Membership.findByAddress(req.body.address);
-    if (!m || m.status !== Membership.Status.active.name) {
-      return next(createError(404, 'The address does not exist.'));
+    let sessionKey = req.body.address;
+    // login as admin
+    const isAdmin = VANILLA_ADMIN_EMAILS.includes(sessionKey);
+    if (isAdmin) {
+      if (VANILLA_ADMIN_PASSWORD && req.body.signature === VANILLA_ADMIN_PASSWORD) {
+        sessionKey = sessionKey.replace('@boscoin.io', '');
+      } else {
+        return next(createError(404, 'The address does not exist.'));
+      }
+    } else {
+      const m = await Membership.findByAddress(sessionKey);
+      if (!m || m.status !== Membership.Status.active.name) {
+        return next(createError(404, 'The address does not exist.'));
+      }
+
+      const isValidSignature = verify(
+        req.session.loginCode,
+        SIGN_NONCE,
+        req.body.signature,
+        req.body.address,
+      );
+      if (!isValidSignature) { return next(createError(400, 'Wrong signature')); }
     }
 
-    const isValidSignature = verify(
-      req.session.loginCode,
-      SIGN_NONCE,
-      req.body.signature,
-      req.body.address,
-    );
-    if (!isValidSignature) { return next(createError(400, 'Wrong signature')); }
-
-    req.session.address = req.body.address;
+    req.session.address = sessionKey;
     if (req.body.source === 'congress_forum') {
       if (req.xhr) {
         return res.json({ redirect_to: VANILLA_FORUM_URL });

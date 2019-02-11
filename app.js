@@ -1,7 +1,7 @@
 const express = require('express');
-const i18next = require("i18next");
-const i18nextMiddleware = require("i18next-express-middleware");
-const FilesystemBackend = require("i18next-node-fs-backend");
+const i18next = require('i18next');
+const i18nextMiddleware = require('i18next-express-middleware');
+const FilesystemBackend = require('i18next-node-fs-backend');
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -20,7 +20,7 @@ i18next
     fallbackLng: 'en',
     preload: ['en', 'ko'],
     backend: {
-      loadPath: 'locales/{{lng}}/{{ns}}.json'
+      loadPath: 'locales/{{lng}}/{{ns}}.json',
     },
     ns: ['web'],
     defaultNS: 'web',

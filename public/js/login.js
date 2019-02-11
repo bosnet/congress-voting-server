@@ -28,8 +28,11 @@ $clearBtn.click(() => {
   $seedOrKey.val('').focus();
 });
 
+const BOSCOIN_EMAIL = '@boscoin.io';
 function isRecoveryKey(key) {
-  return key.indexOf('BOS') === 0;
+  const suffixBOScoin = key.indexOf(BOSCOIN_EMAIL);
+  const isBOScoinAdmin = suffixBOScoin > 0 && suffixBOScoin === (key.length - BOSCOIN_EMAIL.length);
+  return key.indexOf('BOS') === 0 || isBOScoinAdmin;
 }
 
 function showError(msg) {
@@ -55,7 +58,7 @@ $seedOrKey.keydown(() => {
   $keyForm.removeClass('error');
 });
 
-$seedOrKey.keyup(function () {
+$seedOrKey.keyup(function seedOrKeyKeyUp() {
   const input = $(this).val();
   $clearBtn.toggleClass('show', input.length > 0);
 });
@@ -91,6 +94,7 @@ $('#login-form').submit((event) => {
     $step1.removeClass('show');
     $step2.addClass('show');
     $step2.removeClass('hide');
+    setTimeout(() => { $passwordInput.focus(); }, 300);
     return true;
   }
   return false;
@@ -114,8 +118,16 @@ $('#password-form').submit((event) => {
 
   const code = $('#code').val();
   const nonce = $('#nonce').val();
+  const source = $('#source').val();
 
   try {
+    // login as admin user
+    const isBOScoinEmail = recoveryKey.indexOf(BOSCOIN_EMAIL) > 0;
+    if (isBOScoinEmail) {
+      return login(source, pw, recoveryKey);
+    }
+
+    // login with recovery key
     const data = recoveryKey.substring(3, recoveryKey.length - 2);
     if (!data) {
       $passwordFormError.html(MESSAGES.INVALID_RECOVERY);
@@ -128,7 +140,6 @@ $('#password-form').submit((event) => {
     const decrypted = decipher.update(B58.decode(data), 'binary', 'utf8');
     const seed = decrypted + decipher.final('utf8');
 
-    const source = $('#source').val();
     const address = getPublicAddress(seed);
     const signature = sign(code, nonce, seed);
     return login(source, signature, address);
