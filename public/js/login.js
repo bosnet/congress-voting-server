@@ -117,6 +117,12 @@ $('#password-form').submit((event) => {
 
   try {
     const data = recoveryKey.substring(3, recoveryKey.length - 2);
+    if (!data) {
+      $passwordFormError.html(MESSAGES.INVALID_RECOVERY);
+      $passwordForm.addClass('error');
+      return false;
+    }
+
     const pwHash = createHash('sha256').update(pw).digest();
     const decipher = createDecipheriv('aes256', pwHash, iv);
     const decrypted = decipher.update(B58.decode(data), 'binary', 'utf8');
@@ -127,7 +133,7 @@ $('#password-form').submit((event) => {
     const signature = sign(code, nonce, seed);
     return login(source, signature, address);
   } catch (e) {
-    if (e.message === 'unable to decrypt data') {
+    if (e.message === 'unable to decrypt data' || e.message === 'Non-base58 character') {
       $passwordFormError.html(MESSAGES.INVALID_RECOVERY);
       $passwordForm.addClass('error');
     }
