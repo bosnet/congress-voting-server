@@ -30,11 +30,7 @@ compiledStaticFiles
   .filter(f => f.lastIndexOf('.js') === f.length - 3 || f.lastIndexOf('.css') === f.length - 4)
   .forEach((f) => { staticFiles[f.replace(/\..*?\./, '.')] = f; });
 
-router.get('/', (req, res) => {
-  return res.redirect('/login');
-});
-
-router.get('/login', (req, res) => {
+router.get(['/', '/login'], (req, res) => {
   if (req.session.address) {
     return res.redirect(VANILLA_FORUM_URL);
   }
