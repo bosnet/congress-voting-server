@@ -38,7 +38,7 @@ router.get(['/', '/login'], (req, res) => {
 
   req.session.loginCode = loginCode;
   return res.render('login', {
-    title: 'login',
+    title: 'BOScoin Congress forum Login',
     source: req.query.source || '',
     staticFiles,
     loginCode,
