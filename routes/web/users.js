@@ -95,6 +95,12 @@ router.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
+const usernameMap = {
+  servicedesign: 'Service Design',
+  marketing: 'Marketing',
+  pfteam: 'PF team',
+};
+
 router.get('/vanilla/authentication', (req, res) => {
   res.type('application/javascript');
 
@@ -120,10 +126,15 @@ router.get('/vanilla/authentication', (req, res) => {
   }
 
   const addr = req.session.address;
+  let username = addr.substr(0, 7);
+  if (!addr.startsWith('G')) { // admin accounts show their name
+    username = usernameMap[addr] || addr;
+  }
+
   if (addr) {
     const data = {
       email: `${addr}@boscoin.io`,
-      name: addr.substr(0, 7),
+      name: username,
       uniqueid: addr,
     };
     const searchParams = new URLSearchParams(data);
