@@ -96,9 +96,9 @@ router.get('/logout', (req, res) => {
 });
 
 const usernameMap = {
-  servicedesign: 'Service Design',
+  servicedesign: 'ServiceDesign',
   marketing: 'Marketing',
-  pfteam: 'PF team',
+  pfteam: 'PFteam',
 };
 
 router.get('/vanilla/authentication', (req, res) => {
