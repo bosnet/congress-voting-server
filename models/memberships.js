@@ -128,6 +128,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
 
+  Membership.prototype.degrade = async function degrade() {
+    if (this.status === Status.active.name) {
+      await this.update({ status: Status.verified.name });
+      await MembershipLog.register(Object.assign({ membershipId: this.id }, this.toJSON()));
+    }
+  };
+
   Membership.prototype.deactivate = async function deactivate(height = 0, sig) {
     // TODO: prevent public address unique violation
     await this.update({

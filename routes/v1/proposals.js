@@ -3,9 +3,9 @@ const createError = require('http-errors');
 const { hash, verify } = require('sebakjs-util');
 const debug = require('debug')('voting:routes:proposals');
 
-const { Proposal, Vote } = require('../../models/index');
+const { Membership, Proposal, Vote } = require('../../models/index');
 const { underscored } = require('../utils');
-const { currentHeight } = require('../../lib/sebak');
+const { currentHeight, getFrozenAccounts } = require('../../lib/sebak');
 
 const { SEBAK_NETWORKID = 'sebak-test-network' } = process.env;
 
@@ -113,6 +113,21 @@ router.post('/proposals/:id/vote', async (req, res, next) => {
     const height = await currentHeight();
     if (height < pr.start || pr.end < height) {
       return next(createError(400, 'The proposal is not opened.'));
+    }
+
+    const m = await Membership.findByAddress(publicAddress);
+    if (!m || m.status !== Membership.Status.active.name) {
+      return next(createError(400, 'Membership required.'));
+    }
+
+    // check frozen accounts in sebak
+    const accounts = await getFrozenAccounts(publicAddress);
+    const hasFrozen = accounts && accounts._embedded // eslint-disable-line no-underscore-dangle
+      && accounts._embedded.records // eslint-disable-line no-underscore-dangle
+      && accounts._embedded.records.some(r => r.state === 'frozen'); // eslint-disable-line no-underscore-dangle
+    if (!hasFrozen) {
+      await m.degrade();
+      return next(createError(400, 'There is no frozen account'));
     }
 
     const isValidAnswer = Vote.Answer.enumValues.some(e => e.name === answer);
