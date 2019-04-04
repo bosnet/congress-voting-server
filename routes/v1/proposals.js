@@ -124,7 +124,7 @@ router.post('/proposals/:id/vote', async (req, res, next) => {
     const accounts = await getFrozenAccounts(publicAddress);
     const hasFrozen = accounts && accounts._embedded // eslint-disable-line no-underscore-dangle
       && accounts._embedded.records // eslint-disable-line no-underscore-dangle
-      && accounts._embedded.records.some(r => r.state === 'frozen'); // eslint-disable-line no-underscore-dangle
+      && accounts._embedded.records.some(r => r.state === 'frozen' || r.state === 'melting'); // eslint-disable-line no-underscore-dangle
     if (!hasFrozen) {
       await m.degrade();
       return next(createError(400, 'There is no frozen account'));
