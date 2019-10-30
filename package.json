@@ -56,7 +56,7 @@
     "random-word": "^2.0.0",
     "rlp": "^2.2.2",
     "sebakjs-util": "^0.1.1",
-    "sequelize": "^4.42.0",
+    "sequelize": "^5.15.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
