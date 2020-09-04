@@ -72,7 +72,7 @@
     "mini-css-extract-plugin": "^0.5.0",
     "mocha": "^5.2.0",
     "nock": "^10.0.6",
-    "node-sass": "^4.11.0",
+    "node-sass": "^4.13.1",
     "nodemon": "^1.18.9",
     "pino-pretty": "^2.5.0",
     "postcss": "^7.0.14",
