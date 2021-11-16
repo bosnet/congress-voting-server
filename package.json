@@ -27,7 +27,7 @@
   "homepage": "https://github.com/bosnet/congress-voting-desktop#readme",
   "dependencies": {
     "@sentry/node": "^4.5.2",
-    "aws-sdk": "^2.389.0",
+    "aws-sdk": "^2.814.0",
     "base-x": "^3.0.5",
     "camelcase": "^5.0.0",
     "connect-session-sequelize": "^6.0.0",
