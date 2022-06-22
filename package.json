@@ -39,7 +39,7 @@
     "express": "~4.16.0",
     "express-session": "^1.15.6",
     "floating-form-labels": "^1.2.4",
-    "got": "^9.6.0",
+    "got": "^11.8.5",
     "http-errors": "~1.7.1",
     "i18next": "^14.0.1",
     "i18next-express-middleware": "^1.7.1",
